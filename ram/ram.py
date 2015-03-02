@@ -2,7 +2,7 @@ import curses
 
 from color import Color
 
-def init_colours():
+def init_color_pairs():
     """Initializes color pairs for curses."""
     # These numbers are used by Color.blue, etc.
     curses.init_pair(1, curses.COLOR_BLUE,    curses.COLOR_BLACK)
@@ -16,5 +16,12 @@ def init_colours():
 
 def main(stdscr):
     """Starts the game."""
-    init_colours()
-    print("main")
+    curses.initscr()
+    init_color_pairs()
+    Color.initialize()
+
+    stdscr.addstr("main")
+    stdscr.getch()
+
+if __name__ == '__main__':
+    curses.wrapper(main)
