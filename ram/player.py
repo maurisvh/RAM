@@ -9,6 +9,7 @@ class Player(Actor):
 
         # Fake a zero-terminated string.
         self.name = list('test'[:14].ljust(15, '\0'))
+
         # 0 to 255
         self.hp = 10
         # 0 to 255
@@ -18,6 +19,7 @@ class Player(Actor):
         # 0 (no defense) to 15
         self.defense = 1
 
+        self.appearance_byte = 0
         self.display_byte = 0
         self.spell_memory_byte = 0
 
