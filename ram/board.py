@@ -52,9 +52,12 @@ class Board:
         assert len(stairs_positions) >= 2
         assert len(open_positions) >= 6
 
-        up_pos, down_pos = random.sample(stairs_positions, 2)
-        self.tiles[up_pos] = '<'
-        self.tiles[down_pos] = '>'
+        up, down = random.sample(stairs_positions, 2)
+        self.stairs_up   = up
+        self.stairs_down = down
+        self.tiles[up]   = '<'
+        self.tiles[down] = '>'
+
         self.monsters = [None for n in range(MAX_MONSTERS)]
 
         # Map from position to item.
