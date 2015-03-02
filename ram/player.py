@@ -37,6 +37,9 @@ class Player(Actor):
             Timer.protect: 0,
         }
 
+        # Currently selected address in memory
+        self.address = 0
+
     @property
     def maxhp(self):
         # TODO

@@ -1,3 +1,5 @@
+from spell import Spell
+
 # 00 = Player appearance.
 #      top 3 bits = color
 #      bottom 5 bits is character, counting down from ascii '@'
@@ -187,3 +189,36 @@ def write_memory(addr, value):
 # 6 choose lower byte
 # 7 choose upper byte
 
+def cast_spell(spell):
+    global player
+    addr = player.address
+    assert 0x00 <= addr <= 0x3F
+
+    if spell is Spell.ONE:
+        write_memory(addr, 0x01)
+    elif spell is Spell.CLO:
+        v = read_memory(addr)
+        mask = 0x7F
+        while mask and v & mask == v:
+            mask >>= 1
+        v &= mask
+        write_memory(addr, v)
+    elif spell is Spell.INC:
+        v = read_memory(addr)
+        write_memory(addr, (v + 1) & 0xFF)
+    elif spell is Spell.CPN:
+        v = read_memory((addr + 1) & 0x3F)
+        write_memory(addr, v)
+    elif spell is Spell.A9D:
+        v = read_memory(addr)
+        write_memory(addr, (v + 0x9D) & 0xFF)
+    elif spell is Spell.REV:
+        v = read_memory(addr)
+        v = ((v & 0xF0) >> 4) | ((v & 0x0F) << 4)
+        v = ((v & 0xCC) >> 2) | ((v & 0x33) << 2)
+        v = ((v & 0xAA) >> 1) | ((v & 0x55) << 1)
+        write_memory(addr, v)
+    elif spell is Spell.WLN:
+        raise NotImplementedError()
+    elif spell is Spell.WHN:
+        raise NotImplementedError()
