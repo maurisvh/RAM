@@ -1,5 +1,6 @@
 from actor import Actor
 from element import Element
+from timer import Timer
 
 class Player(Actor):
     def __init__(self):
