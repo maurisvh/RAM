@@ -43,6 +43,11 @@ class Player(Actor):
         # Currently selected address in memory
         self.address = 0
 
+        self.dlvl_delta = 0x01
+        self.timer_delta = 0xFF
+        self.damage_offset = 0x00
+        self.text_sync = 0x00 
+
     @property
     def maxhp(self):
         # TODO
