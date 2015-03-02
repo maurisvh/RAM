@@ -51,7 +51,7 @@ addr_damage_offset = 0x35
 
 # 36 = ?
 # 37 = ? (should mess things up very hard)
-#
+
 # 38 = "text sync" (causes glitches when set high)
 addr_text_sync = 0x38
 
@@ -59,20 +59,123 @@ addr_text_sync = 0x38
 addr_player_hp = 0x39
 
 # 3A = Player TP (capped by XL).
-addr_player_tp = 0x39
+addr_player_tp = 0x3A
 
 # 3B = high nibble: XL 0-15
 #      low nibble: Def 0-15
-addr_player_xl_def = 0x3a
+addr_player_xl_def = 0x3B
 
 # 3C = position (y + 19*x)
-#
-# 3D = dlvl
-#
-# 3E = metal (hi) acid (lo) res
-#
-# 3F = fire (hi) elec (lo) res
+addr_player_pos = 0x3C
 
+# 3D = dlvl
+addr_player_dlvl = 0x3D
+
+# 3E = metal (hi) acid (lo) res
+addr_player_metal_acid = 0x3E
+
+# 3F = fire (hi) elec (lo) res
+addr_player_fire_elec = 0x3F
+
+def read_memory(addr):
+    global player
+
+    if addr == addr_player_appearance:
+        pass
+    elif addr in addr_player_name:
+        pass
+    elif addr in addr_mon_flags:
+        pass
+    elif addr in addr_mon_pos:
+        pass
+    elif addr in addr_mon_hp:
+        pass
+    elif addr == addr_spell_memory:
+        pass
+    elif addr in addr_identify:
+        pass
+    elif addr in addr_timers:
+        pass
+    elif addr in addr_inventory:
+        pass
+    elif addr == addr_door_appearance:
+        pass
+    elif addr == addr_wall_appearance:
+        pass
+    elif addr == addr_floor_color:
+        pass
+    elif addr == addr_dlvl_delta:
+        pass
+    elif addr == addr_timer_delta:
+        pass
+    elif addr == addr_damage_offset:
+        pass
+    elif addr == addr_text_sync:
+        pass
+    elif addr == addr_player_hp:
+        pass
+    elif addr == addr_player_tp:
+        pass
+    elif addr == addr_player_xl_def:
+        pass
+    elif addr == addr_player_pos:
+        pass
+    elif addr == addr_player_dlvl:
+        pass
+    elif addr == addr_player_metal_acid:
+        pass
+    elif addr == addr_player_fire_elec:
+        pass
+
+def write_memory(addr, value):
+    global player
+
+    if addr == addr_player_appearance:
+        pass
+    elif addr in addr_player_name:
+        pass
+    elif addr in addr_mon_flags:
+        pass
+    elif addr in addr_mon_pos:
+        pass
+    elif addr in addr_mon_hp:
+        pass
+    elif addr == addr_spell_memory:
+        pass
+    elif addr in addr_identify:
+        pass
+    elif addr in addr_timers:
+        pass
+    elif addr in addr_inventory:
+        pass
+    elif addr == addr_door_appearance:
+        pass
+    elif addr == addr_wall_appearance:
+        pass
+    elif addr == addr_floor_color:
+        pass
+    elif addr == addr_dlvl_delta:
+        pass
+    elif addr == addr_timer_delta:
+        pass
+    elif addr == addr_damage_offset:
+        pass
+    elif addr == addr_text_sync:
+        pass
+    elif addr == addr_player_hp:
+        pass
+    elif addr == addr_player_tp:
+        pass
+    elif addr == addr_player_xl_def:
+        pass
+    elif addr == addr_player_pos:
+        pass
+    elif addr == addr_player_dlvl:
+        pass
+    elif addr == addr_player_metal_acid:
+        pass
+    elif addr == addr_player_fire_elec:
+        pass
 
 # Spells:
 # 0 zero
