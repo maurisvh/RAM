@@ -1,6 +1,7 @@
 import curses
 
 from color import Color
+from player import Player
 
 def init_color_pairs():
     """Initializes color pairs for curses."""
@@ -20,6 +21,7 @@ def main(stdscr):
     init_color_pairs()
     Color.initialize()
 
+    player = Player()
     stdscr.addstr("main")
     stdscr.getch()
 
