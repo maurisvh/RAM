@@ -59,6 +59,10 @@ class Board:
         self.tiles[down] = '>'
 
         self.monsters = [None for n in range(MAX_MONSTERS)]
+        num_mons = min(MAX_MONSTERS, random.randint(1, 2) + depth // 2)
+        for i in range(num_mons):
+            # TODO make monsters
+            self.monsters[i] = None
 
         # Map from position to item.
         self.items = {}
