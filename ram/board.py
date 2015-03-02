@@ -16,6 +16,8 @@ class Board:
     HEIGHT = 13
 
     def __init__(self, depth, des):
+        self.depth = depth
+
         self.tiles = []
         stairs_positions = set()
         open_positions = set()
