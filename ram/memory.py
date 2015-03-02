@@ -134,6 +134,8 @@ def read_memory(addr):
               | player.aptitude[Element.elec]
 
 def write_memory(addr, value):
+    raise NotImplementedError()
+
     global player
 
     if addr == addr_player_appearance:
