@@ -1,4 +1,5 @@
 from spell import Spell
+from element import Element
 
 # 00 = Player appearance.
 #      top 3 bits = color
@@ -83,51 +84,54 @@ def read_memory(addr):
     global player
 
     if addr == addr_player_appearance:
-        pass
+        return player.appearance_byte
     elif addr in addr_player_name:
-        pass
+        return player.name[addr - 1]
     elif addr in addr_mon_flags:
-        pass
+        raise NotImplementedError()
     elif addr in addr_mon_pos:
-        pass
+        raise NotImplementedError()
     elif addr in addr_mon_hp:
-        pass
+        raise NotImplementedError()
     elif addr == addr_spell_memory:
-        pass
+        return player.spell_memory_byte
     elif addr in addr_identify:
-        pass
+        raise NotImplementedError()
     elif addr in addr_timers:
-        pass
+        timer = addr_timers[addr]
+        return player.timers[timer]
     elif addr in addr_inventory:
-        pass
+        raise NotImplementedError()
     elif addr == addr_door_appearance:
-        pass
+        raise NotImplementedError()
     elif addr == addr_wall_appearance:
-        pass
+        raise NotImplementedError()
     elif addr == addr_floor_color:
-        pass
+        raise NotImplementedError()
     elif addr == addr_dlvl_delta:
-        pass
+        return player.dlvl_delta
     elif addr == addr_timer_delta:
-        pass
+        return player.timer_delta
     elif addr == addr_damage_offset:
-        pass
+        return player.damage_offset
     elif addr == addr_text_sync:
-        pass
+        return player.text_sync
     elif addr == addr_player_hp:
-        pass
+        return player.hp
     elif addr == addr_player_tp:
-        pass
+        return player.tp
     elif addr == addr_player_xl_def:
-        pass
+        return (player.xl << 4) | player.defense
     elif addr == addr_player_pos:
-        pass
+        return player.pos
     elif addr == addr_player_dlvl:
-        pass
+        return player.dlvl
     elif addr == addr_player_metal_acid:
-        pass
+        return (player.aptitude[Element.metal] << 4) \
+              | player.aptitude[Element.acid]
     elif addr == addr_player_fire_elec:
-        pass
+        return (player.aptitude[Element.fire] << 4) \
+              | player.aptitude[Element.elec]
 
 def write_memory(addr, value):
     global player
