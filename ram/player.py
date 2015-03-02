@@ -8,7 +8,8 @@ class Player(Actor):
         self.dlvl = None
 
         # Fake a zero-terminated string.
-        self.name = list('test'[:14].ljust(15, '\0'))
+        self.name = 'test'
+        self.name = [ord(c) for c in name[:14].ljust(15, '\0')]
 
         # 0 to 255
         self.hp = 10
