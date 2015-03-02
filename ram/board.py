@@ -1,5 +1,6 @@
 from constants import *
 from util import coinflip
+from string import ascii_uppercase
 
 import random
 
@@ -35,9 +36,12 @@ class Board:
         des = ''.join(des)
         assert len(des) == Board.WIDTH * Board.HEIGHT
 
-        # This is sort of a hack?
-        for c in 'ABCDEFGHIJKLMNOP':
+        # Replace ABCD groups with walls/floors randomly.
+        for c in ascii_uppercase:
+            if c not in des:
+                break
             des = des.replace(c, random.choice('.#'))
+
         for pos, c in enumerate(des):
             # Don't always generate doors.
             if c == '+' and random.random() < 0.1:
