@@ -87,7 +87,7 @@ def read_memory(player, addr):
     if addr == addr_player_appearance:
         return player.appearance_byte
     elif addr in addr_player_name:
-        return player.name[addr - 1]
+        return player.name[addr - addr_player_name[0]]
     elif addr in addr_mon_flags:
         raise NotImplementedError()
     elif addr in addr_mon_pos:
@@ -179,7 +179,8 @@ def write_memory(player, addr, value):
         player.appearance_byte = value
 
     elif addr in addr_player_name:
-        raise NotImplementedError()
+        idx = addr - addr_player_name[0]
+        player.name[idx] = value
     elif addr in addr_mon_flags:
         raise NotImplementedError()
     elif addr in addr_mon_pos:
