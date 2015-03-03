@@ -3,7 +3,7 @@ import curses
 # We need to call curses.initscr before we can initialize these.
 def initialize():
     global blue, green, cyan, red, magenta, brown, lightgray
-    global darkgray, lightblur, lightgreen, lightcyan, lightred
+    global darkgray, lightblue, lightgreen, lightcyan, lightred
     global lightmagenta, yellow, white
     blue         = curses.color_pair(1)
     green        = curses.color_pair(2)
