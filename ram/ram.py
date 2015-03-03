@@ -25,9 +25,10 @@ def main(stdscr):
 
     player = Player()
     memory.write_memory(player, memory.addr_player_appearance, 41)
+    memory.write_memory(player, memory.addr_player_appearance, 41+64)
     for i, line in enumerate(messages):
-        stdscr.addstr(i, 1, line[0])
-        stdscr.getch()
+        stdscr.addstr(i, 0, line[0])
+    stdscr.getch()
 
 if __name__ == '__main__':
     curses.wrapper(main)
