@@ -1,5 +1,4 @@
-class Element:
-    metal = 'metal'
-    acid = 'acid'
-    fire = 'fire'
-    elec = 'elec'
+metal = 'metal'
+acid = 'acid'
+fire = 'fire'
+elec = 'elec'

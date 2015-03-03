@@ -1,7 +1,7 @@
 import curses
 
-from color import Color
-from player import Player
+import Color
+from Player import Player
 from messages import messages
 import memory
 

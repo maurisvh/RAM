@@ -1,4 +1,4 @@
-from color import Color
+import Color
 
 messages = []
 

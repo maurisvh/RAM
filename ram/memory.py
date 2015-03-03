@@ -1,7 +1,7 @@
-from player import Player
-from spell import Spell
-from element import Element
-from timer import Timer
+from Player import Player
+import Spell
+import Element
+import Timer
 from messages import msg
 
 # 00 = Player appearance.
