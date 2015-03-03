@@ -2,6 +2,8 @@ import curses
 
 from color import Color
 from player import Player
+from messages import messages
+import memory
 
 def init_color_pairs():
     """Initializes color pairs for curses."""
@@ -22,8 +24,10 @@ def main(stdscr):
     Color.initialize()
 
     player = Player()
-    stdscr.addstr("main")
-    stdscr.getch()
+    memory.write_memory(player, memory.addr_player_appearance, 41)
+    for i, line in enumerate(messages):
+        stdscr.addstr(i, 1, line[0])
+        stdscr.getch()
 
 if __name__ == '__main__':
     curses.wrapper(main)
