@@ -1,5 +1,8 @@
+from player import Player
 from spell import Spell
 from element import Element
+from timer import Timer
+from messages import msg
 
 # 00 = Player appearance.
 #      top 3 bits = color
@@ -29,7 +32,7 @@ addr_identify = {0x20: 0, 0x21: 8, 0x22: 16, 0x23: 24}
 
 # 24-27 = timers
 addr_timers = {0x24: Timer.poison, 0x25: Timer.haste,
-              0x26: Timer.charge, 0x27: Timer.protect}
+               0x26: Timer.charge, 0x27: Timer.protect}
 
 # 28-2F = inventory
 addr_inventory = {0x28+i: i for i in range(8)}
@@ -80,9 +83,7 @@ addr_player_metal_acid = 0x3E
 # 3F = fire (hi) elec (lo) res
 addr_player_fire_elec = 0x3F
 
-def read_memory(addr):
-    global player
-
+def read_memory(player, addr):
     if addr == addr_player_appearance:
         return player.appearance_byte
     elif addr in addr_player_name:
@@ -133,57 +134,94 @@ def read_memory(addr):
         return (player.aptitude[Element.fire] << 4) \
               | player.aptitude[Element.elec]
 
-def write_memory(addr, value):
-    raise NotImplementedError()
+def describe_player(byte):
+    col = [
+        'white', 'yellow', 'pink', 'red',
+        'cyan',  'green',  'blue', 'gray',
+    ][byte >> 5]
+    noun = [
+        'at sign',        'question mark',
+        'angle bracket',  'equals sign',
+        'angle bracket',  'semicolon',
+        'colon',          'nine',
+        'eight',          'seven',
+        'six',            'five',
+        'four',           'three',
+        'two',            'one',
+        'zero',           'slash',
+        'dot',            'dash',
+        'comma',          'plus',
+        'asterisk',       'parenthesis',
+        'parenthesis',    'apostrophe',
+        'ampersand',      'percent sign',
+        'dollar sign',    'pound sign',
+        'quotation mark', 'exclamation point',
+    ][byte & 0x1F]
+    return (col, noun)
 
-    global player
+def write_memory(player, addr, value):
+    assert 0x00 <= value <= 0xFF
 
     if addr == addr_player_appearance:
-        pass
+        old_col, old_noun = describe_player(player.appearance_byte)
+        col, noun = describe_player(value)
+        if old_col == col:
+            if old_noun == noun:
+                msg('You feel momentarily different.')
+            else:
+                # Dirty hack, but sufficient.
+                article = 'an' if noun[0] in 'ae' else 'a'
+                msg('You turn into {0} {1}!'.format(article, noun))
+        elif old_noun == noun:
+            msg('You turn {0}!'.format(col))
+        else:
+            msg('You turn into a {0} {1}!'.format(col, noun))
+        player.appearance_byte = value
+
     elif addr in addr_player_name:
-        pass
+        raise NotImplementedError()
     elif addr in addr_mon_flags:
-        pass
+        raise NotImplementedError()
     elif addr in addr_mon_pos:
-        pass
+        raise NotImplementedError()
     elif addr in addr_mon_hp:
-        pass
+        raise NotImplementedError()
     elif addr == addr_spell_memory:
-        pass
+        raise NotImplementedError()
     elif addr in addr_identify:
-        pass
+        raise NotImplementedError()
     elif addr in addr_timers:
-        pass
+        raise NotImplementedError()
     elif addr in addr_inventory:
-        pass
+        raise NotImplementedError()
     elif addr == addr_door_appearance:
-        pass
+        raise NotImplementedError()
     elif addr == addr_wall_appearance:
-        pass
+        raise NotImplementedError()
     elif addr == addr_floor_color:
-        pass
+        raise NotImplementedError()
     elif addr == addr_dlvl_delta:
-        pass
+        raise NotImplementedError()
     elif addr == addr_timer_delta:
-        pass
+        raise NotImplementedError()
     elif addr == addr_damage_offset:
-        pass
+        raise NotImplementedError()
     elif addr == addr_text_sync:
-        pass
+        raise NotImplementedError()
     elif addr == addr_player_hp:
-        pass
+        raise NotImplementedError()
     elif addr == addr_player_tp:
-        pass
+        raise NotImplementedError()
     elif addr == addr_player_xl_def:
-        pass
+        raise NotImplementedError()
     elif addr == addr_player_pos:
-        pass
+        raise NotImplementedError()
     elif addr == addr_player_dlvl:
-        pass
+        raise NotImplementedError()
     elif addr == addr_player_metal_acid:
-        pass
+        raise NotImplementedError()
     elif addr == addr_player_fire_elec:
-        pass
+        raise NotImplementedError()
 
 # Spells:
 # 0 zero
@@ -195,35 +233,34 @@ def write_memory(addr, value):
 # 6 choose lower byte
 # 7 choose upper byte
 
-def cast_spell(spell):
-    global player
+def cast_spell(player, spell):
     addr = player.address
     assert 0x00 <= addr <= 0x3F
 
     if spell is Spell.ONE:
-        write_memory(addr, 0x01)
+        write_memory(player, addr, 0x01)
     elif spell is Spell.CLO:
-        v = read_memory(addr)
+        v = read_memory(player, addr)
         mask = 0x7F
         while mask and v & mask == v:
             mask >>= 1
         v &= mask
-        write_memory(addr, v)
+        write_memory(player, addr, v)
     elif spell is Spell.INC:
-        v = read_memory(addr)
-        write_memory(addr, (v + 1) & 0xFF)
+        v = read_memory(player, addr)
+        write_memory(player, addr, (v + 1) & 0xFF)
     elif spell is Spell.CPN:
-        v = read_memory((addr + 1) & 0x3F)
-        write_memory(addr, v)
+        v = read_memory(player, (addr + 1) & 0x3F)
+        write_memory(player, addr, v)
     elif spell is Spell.A9D:
-        v = read_memory(addr)
-        write_memory(addr, (v + 0x9D) & 0xFF)
+        v = read_memory(player, addr)
+        write_memory(player, addr, (v + 0x9D) & 0xFF)
     elif spell is Spell.REV:
-        v = read_memory(addr)
+        v = read_memory(player, addr)
         v = ((v & 0xF0) >> 4) | ((v & 0x0F) << 4)
         v = ((v & 0xCC) >> 2) | ((v & 0x33) << 2)
         v = ((v & 0xAA) >> 1) | ((v & 0x55) << 1)
-        write_memory(addr, v)
+        write_memory(player, addr, v)
     elif spell is Spell.WLN:
         raise NotImplementedError()
     elif spell is Spell.WHN:
