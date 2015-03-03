@@ -5,8 +5,8 @@ import Timer
 from messages import msg
 
 # 00 = Player appearance.
-#      top 3 bits = color
-#      bottom 5 bits is character, counting down from ascii '@'
+#      bottom 3 bits = color
+#      top 5 bits is character, counting down from ascii '@'
 #
 addr_player_appearance = 0x00
 
@@ -138,7 +138,7 @@ def describe_player(byte):
     col = [
         'white', 'yellow', 'pink', 'red',
         'cyan',  'green',  'blue', 'gray',
-    ][byte >> 5]
+    ][byte & 0x07]
     noun = [
         'at sign',        'question mark',
         'angle bracket',  'equals sign',
@@ -156,7 +156,7 @@ def describe_player(byte):
         'ampersand',      'percent sign',
         'dollar sign',    'pound sign',
         'quotation mark', 'exclamation point',
-    ][byte & 0x1F]
+    ][byte >> 3]
     return (col, noun)
 
 def write_memory(player, addr, value):
