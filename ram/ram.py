@@ -9,6 +9,7 @@ import view
 def main(stdscr):
     """Starts the game."""
     curses.initscr()
+    curses.curs_set(0) # invisible
     Color.initialize()
 
     player = Player()
