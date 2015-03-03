@@ -2,21 +2,21 @@ import curses
 
 # We need to call curses.initscr before we can initialize these.
 def initialize():
-    global blue, green, cyan, red, magenta, brown, lightgray
-    global darkgray, lightblue, lightgreen, lightcyan, lightred
-    global lightmagenta, yellow, white
-    blue         = curses.color_pair(1)
-    green        = curses.color_pair(2)
-    cyan         = curses.color_pair(3)
-    red          = curses.color_pair(4)
-    magenta      = curses.color_pair(5)
-    brown        = curses.color_pair(6)
-    lightgray    = curses.color_pair(7)
-    darkgray     = curses.color_pair(8) | curses.A_BOLD
-    lightblue    = curses.color_pair(1) | curses.A_BOLD
-    lightgreen   = curses.color_pair(2) | curses.A_BOLD
-    lightcyan    = curses.color_pair(3) | curses.A_BOLD
-    lightred     = curses.color_pair(4) | curses.A_BOLD
-    lightmagenta = curses.color_pair(5) | curses.A_BOLD
-    yellow       = curses.color_pair(6) | curses.A_BOLD
-    white        = curses.color_pair(7) | curses.A_BOLD
+    global BLUE, GREEN, CYAN, RED, MAGENTA, BROWN, LIGHTGRAY
+    global DARKGRAY, LIGHTBLUE, LIGHTGREEN, LIGHTCYAN, LIGHTRED
+    global LIGHTMAGENTA, YELLOW, WHITE
+    BLUE         = curses.color_pair(1)
+    GREEN        = curses.color_pair(2)
+    CYAN         = curses.color_pair(3)
+    RED          = curses.color_pair(4)
+    MAGENTA      = curses.color_pair(5)
+    BROWN        = curses.color_pair(6)
+    LIGHTGRAY    = curses.color_pair(7)
+    DARKGRAY     = curses.color_pair(8) | curses.A_BOLD
+    LIGHTBLUE    = curses.color_pair(1) | curses.A_BOLD
+    LIGHTGREEN   = curses.color_pair(2) | curses.A_BOLD
+    LIGHTCYAN    = curses.color_pair(3) | curses.A_BOLD
+    LIGHTRED     = curses.color_pair(4) | curses.A_BOLD
+    LIGHTMAGENTA = curses.color_pair(5) | curses.A_BOLD
+    YELLOW       = curses.color_pair(6) | curses.A_BOLD
+    WHITE        = curses.color_pair(7) | curses.A_BOLD

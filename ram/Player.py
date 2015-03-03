@@ -27,18 +27,18 @@ class Player(Actor):
 
         # Elemental aptitudes (-8 to 7)
         self.aptitude = {
-            Element.metal: 0,
-            Element.acid:  0,
-            Element.fire:  0,
-            Element.elec:  0,
+            Element.METAL: 0,
+            Element.ACID:  0,
+            Element.FIRE:  0,
+            Element.ELEC:  0,
         }
 
         # Timers (0 to 255)
         self.timers = {
-            Timer.poison:  0,
-            Timer.haste:   0,
-            Timer.charge:  0,
-            Timer.protect: 0,
+            Timer.POISON:  0,
+            Timer.HASTE:   0,
+            Timer.CHARGE:  0,
+            Timer.PROTECT: 0,
         }
 
         # Currently selected address in memory
@@ -52,9 +52,9 @@ class Player(Actor):
     @property
     def color(self):
         c = self.appearance_byte & 0x07
-        return [Color.white, Color.yellow, Color.lightmagenta,
-                Color.lightred, Color.lightcyan, Color.lightgreen,
-                Color.lightblue, Color.darkgray][c]
+        return [Color.WHITE, Color.YELLOW, Color.LIGHTMAGENTA,
+                Color.LIGHTRED, Color.LIGHTCYAN, Color.LIGHTGREEN,
+                Color.LIGHTBLUE, Color.DARKGRAY][c]
 
     @property
     def char(self):

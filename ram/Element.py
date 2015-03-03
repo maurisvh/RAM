@@ -1,4 +1,4 @@
-metal = 'metal'
-acid = 'acid'
-fire = 'fire'
-elec = 'elec'
+METAL = 'metal'
+ACID = 'acid'
+FIRE = 'fire'
+ELEC = 'elec'

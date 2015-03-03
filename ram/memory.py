@@ -31,8 +31,8 @@ addr_spell_memory = 0x1F
 addr_identify = {0x20: 0, 0x21: 8, 0x22: 16, 0x23: 24}
 
 # 24-27 = timers
-addr_timers = {0x24: Timer.poison, 0x25: Timer.haste,
-               0x26: Timer.charge, 0x27: Timer.protect}
+addr_timers = {0x24: Timer.POISON, 0x25: Timer.HASTE,
+               0x26: Timer.CHARGE, 0x27: Timer.PROTECT}
 
 # 28-2F = inventory
 addr_inventory = {0x28+i: i for i in range(8)}
@@ -128,11 +128,11 @@ def read_memory(player, addr):
     elif addr == addr_player_dlvl:
         return player.dlvl
     elif addr == addr_player_metal_acid:
-        return (player.aptitude[Element.metal] << 4) \
-              | player.aptitude[Element.acid]
+        return (player.aptitude[Element.METAL] << 4) \
+              | player.aptitude[Element.ACID]
     elif addr == addr_player_fire_elec:
-        return (player.aptitude[Element.fire] << 4) \
-              | player.aptitude[Element.elec]
+        return (player.aptitude[Element.FIRE] << 4) \
+              | player.aptitude[Element.ELEC]
 
 def describe_player(byte):
     col = [

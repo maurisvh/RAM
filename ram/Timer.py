@@ -1,4 +1,4 @@
-poison = 'poison'
-haste = 'haste'
-charge = 'charge'
-protect = 'protect'
+POISON = 'poison'
+HASTE = 'haste'
+CHARGE = 'charge'
+PROTECT = 'protect'
