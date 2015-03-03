@@ -1,6 +1,7 @@
 from Actor import Actor
 import Element
 import Timer
+import Color
 
 class Player(Actor):
     def __init__(self):
@@ -46,7 +47,19 @@ class Player(Actor):
         self.dlvl_delta = 0x01
         self.timer_delta = 0xFF
         self.damage_offset = 0x00
-        self.text_sync = 0x00 
+        self.text_sync = 0x00
+
+    @property
+    def color(self):
+        c = self.appearance_byte & 0x07
+        return [Color.white, Color.yellow, Color.lightmagenta,
+                Color.lightred, Color.lightcyan, Color.lightgreen,
+                Color.lightblue, Color.darkgray][c]
+
+    @property
+    def char(self):
+        c = self.appearance_byte >> 3
+        return chr(ord('@') - c)
 
     @property
     def maxhp(self):
