@@ -1,6 +1,7 @@
 import curses
 
 import Color
+from Board import make_dungeon
 from Player import Player
 from messages import messages
 import memory
@@ -13,6 +14,9 @@ def main(stdscr):
     Color.initialize()
 
     player = Player()
+    dungeon = make_dungeon()
+    player.pos = dungeon[0].stairs_up
+
     # memory.write_memory(player, memory.addr_player_appearance, 41)
     # memory.write_memory(player, memory.addr_player_appearance, 41+64)
     # for i, line in enumerate(messages):

@@ -6,7 +6,7 @@ import Color
 class Player(Actor):
     def __init__(self):
         self.pos = None
-        self.dlvl = None
+        self.dlvl = 0
 
         # Fake a zero-terminated string.
         name = 'test'
