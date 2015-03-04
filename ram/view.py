@@ -1,6 +1,34 @@
 import curses
 from constants import *
 
+# Screen dimensions.
+
+# AAAABBBBBBBB
+# AAAABBBBBBBB  A = status / ram window
+# AAAABBBBBBBB  B = game window (centered)
+# AAAABBBBBBBB  C = message window
+# AAAABBBBBBBB
+# AAAABBBBBBBB
+# CCCCCCCCCCCC
+# CCCCCCCCCCCC
+
+SCREEN_WIDTH = 80
+SCREEN_HEIGHT = 24
+WIN_STATUS_WIDTH = 25
+WIN_TEXT_HEIGHT = 6
+
+# Align everything else.
+WIN_STATUS_X = 0
+WIN_STATUS_Y = 0
+WIN_TEXT_X = 0
+WIN_TEXT_WIDTH = SCREEN_WIDTH
+WIN_STATUS_HEIGHT = SCREEN_HEIGHT - WIN_TEXT_HEIGHT
+WIN_TEXT_Y = WIN_STATUS_HEIGHT
+WIN_GAME_X = WIN_STATUS_WIDTH
+WIN_GAME_Y = WIN_STATUS_Y
+WIN_GAME_WIDTH = SCREEN_WIDTH - WIN_STATUS_WIDTH
+WIN_GAME_HEIGHT = WIN_STATUS_HEIGHT
+
 def update_screen(stdscr):
     win_status = curses.newwin(WIN_STATUS_HEIGHT, WIN_STATUS_WIDTH,
                                WIN_STATUS_Y, WIN_STATUS_X)
