@@ -2,6 +2,7 @@ import curses
 from Board import Board
 import Color
 import Element
+import Item
 from constants import *
 import random
 
@@ -112,7 +113,10 @@ def update_status(win_status, player):
         y = ram_y + i // 8
         x = ram_x + i % 8 * 3
         byte = random.randint(0, 255)
-        win_status.addstr(y, x, "{:02X}".format(byte), Color.LIGHTBLUE)
+        attr = Color.CYAN
+        if i == player.address:
+            attr = Color.LIGHTGRAY | curses.A_REVERSE
+        win_status.addstr(y, x, "{:02X}".format(byte), attr)
 
     win_status.refresh()
 
@@ -137,4 +141,13 @@ def update_screen(stdscr, player, dungeon):
 
     update_status(win_status, player)
 
-    win_text.getch()
+    stdscr.clear()
+    for i in range(0x20):
+        it = Item.Item(i << 3)
+        stdscr.addstr(i % 16 + 3, i // 16 * 25 + 17,
+                it.char() + ' ', it.color())
+        for c in it.kind_name():
+            stdscr.addstr(c, it.color())
+    stdscr.refresh()
+
+    stdscr.getch()

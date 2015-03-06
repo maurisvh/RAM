@@ -1,181 +1,212 @@
 import Color
 import Element
 
+import curses
 import random
+CHAR_WEAPON     = '/'
+CHAR_BODY_ARMOR = '['
+CHAR_NECKLACE   = '"'
+CHAR_FOOD       = '*'
+CHAR_MISC       = '$'
+CHAR_ARTIFACT   = '&'
 
-class Item:
-    color = Color.LIGHTMAGENTA; char = '?'
-    base_name = 'dummy'
-    def __init__(self, enchanted, equipped, cursed):
-        self.enchanted = enchanted
-        self.equipped = equipped
-        self.cursed = cursed
-    @property
-    def name(self):
-        s = base_name
-        if self.enchanted:
-            s = 'enchanted ' + s
-        if self.cursed:
-            s = 'cursed ' + s
-        return s
+weapons     = []
+body_armors = []
+necklaces   = []
+consumables = []
 
-    @property
-    def a_name(self):
-        s = self.name
-        if s[0].lower() in 'aeiou':
-            return 'an ' + s
-        else:
-            return 'a ' + s
+class Flag:
+    def __init__(self, where):
+        self.where = where
+    def __rsub__(self, num):
+        self.where.append(num); return num
+w, b, n, c = map(Flag, (weapons, body_armors, necklaces, consumables))
 
-class Equippable(Item):
-    @property
-    def name(self):
-        s = Item.name(self)
-        if self.equipped:
-            s += ' (in use)'
-        return s
+fruits = f = list(range(0x05, 0x08))
+random.shuffle(fruits)
+pills = p = list(range(0x08, 0x10))
+random.shuffle(pills)
 
-class Weapon(Equippable):
-    color = Color.LIGHTMAGENTA; char = '/'
-    base_dmg = 0
-    element = None
-
-class RangedWeapon(Weapon):
-    pass
-
-class Armor(Equippable):
-    color = Color.LIGHTMAGENTA; char = '['
-    defense = 0
-    aptitude = {Element.METAL: 0, Element.ACID: 0,
-                Element.FIRE: 0, Element.ELEC: 0}
-
-class Necklace(Armor):
-    char = '"'
-    aptitude = {Element.METAL: 0, Element.ACID: 0,
-                Element.FIRE: 0, Element.ELEC: 0}
-
-class Consumable(Item):
-    char = '*'
-
-class Device(Consumable):
-    char = '$'
-
-class Artifact(Item):
-    char = '&'
-
+NO_ITEM           = 0x00;     THICK_SWEATER     = 0x10 -b
+CROWBAR           = 0x01 -w;  BALLISTIC_VEST    = 0x11 -b
+VOLCANIC_SHARD    = 0x02 -w;  DRAGON_SCALE_MAIL = 0x12 -b
+TASER             = 0x03 -w;  TITANIUM_NECKLACE = 0x13 -n
+JELLY_GUN         = 0x04 -w;  RUSTY_NECKLACE    = 0x14 -n
+FULL_HP_FRUIT     = f[0] -c;  CRIMSON_NECKLACE  = 0x15 -n
+FULL_TP_FRUIT     = f[1] -c;  GLOWING_NECKLACE  = 0x16 -n
+HALF_HP_FRUIT     = f[2] -c;  UNHOLY_NECKLACE   = 0x17 -n
+CHARGE_PILL       = p[0] -c;  WAND_OF_DEATH     = 0x18 -c
+XP_UP_PILL        = p[1] -c;  MANUAL            = 0x19 -c
+HASTE_PILL        = p[2] -c;  GUIDEBOOK         = 0x1A -c
+IDENTIFY_PILL     = p[3] -c;  CORRUPTOR         = 0x1B -c
+XP_DOWN_PILL      = p[4] -c;  OFFSETTER         = 0x1C -c
+POISON_PILL       = p[5] -c;  COPIER            = 0x1D -c
+PROTECT_PILL      = p[6] -c;  PALANTIR          = 0x1E
+TORMENT_PILL      = p[7] -c;  GOLDEN_CANDLE     = 0x1F
+del f, p, Flag, w, b, n, c
 ######################################################################
 
-class Crowbar(Weapon):
-    base_name = 'crowbar'
-    color = Color.DARKGRAY
-    base_dmg = 3
-    element = Element.METAL
+class Item:
+    def __init__(self, byte):
+        self.byte = byte
 
-class VolcanicShard(Weapon):
-    base_name = 'volcanic shard'
-    color = Color.LIGHTRED
-    base_dmg = 5
-    element = Element.FIRE
-
-class Taser(Weapon):
-    base_name = 'taser'
-    color = Color.LIGHTBLUE
-    base_dmg = 6
-    element = Element.ELEC
-
-class JellyGun(RangedWeapon):
-    base_name = 'jelly gun'
-    color = Color.LIGHTGREEN
-    base_dmg = 3
-    element = Element.ACID
-
-class ThickSweater(Armor):
-    base_name = 'thick sweater'
-    color = Color.MAGENTA
-    defense = 3
-    aptitude = {Element.METAL: 0, Element.ACID: 0,
-                Element.FIRE: 2, Element.ELEC: -2}
-
-class BallisticVest(Armor):
-    base_name = 'ballistic vest'
-    color = Color.CYAN
-    defense = 5
-    aptitude = {Element.METAL: 2, Element.ACID: -2,
-                Element.FIRE: 0, Element.ELEC: 0}
-
-class DragonScaleMail(Armor):
-    base_name = 'dragon scale mail'
-    color = Color.GREEN
-    defense = 7
-    aptitude = {Element.METAL: 0, Element.ACID: 2,
-                Element.FIRE: -2, Element.ELEC: 0}
-
-class TitaniumNecklace(Necklace):
-    base_name = 'titanium necklace'
-    color = Color.LIGHTGRAY
-    aptitude = {Element.METAL: 3, Element.ACID: -1,
-                Element.FIRE: -1, Element.ELEC: -1}
-
-class RustyNecklace(Necklace):
-    base_name = 'rusty necklace'
-    color = Color.BROWN
-    aptitude = {Element.METAL: -1, Element.ACID: 3,
-                Element.FIRE: -1, Element.ELEC: -1}
-
-class CrimsonNecklace(Necklace):
-    base_name = 'crimson necklace'
-    color = Color.RED
-    aptitude = {Element.METAL: -1, Element.ACID: -1,
-                Element.FIRE: 3, Element.ELEC: -1}
-
-class GlowingNecklace(Necklace):
-    base_name = 'glowing necklace'
-    color = Color.YELLOW
-    aptitude = {Element.METAL: -1, Element.ACID: -1,
-                Element.FIRE: -1, Element.ELEC: 3}
-
-class UnholyNecklace(Necklace):
-    base_name = 'unholy necklace'
-    color = Color.DARKGRAY
-    aptitude = {Element.METAL: -3, Element.ACID: -3,
-                Element.FIRE:  -3, Element.ELEC: -3}
-
-class WandOfDeath(Consumable):
-    base_name = 'wand of death'
-    color = Color.BLUE
-    char = '/'
-
-class Manual(Consumable):
-    base_name = 'manual'
-    color = Color.LIGHTBLUE
-    char = ':'
-
-class Guidebook(Consumable):
-    base_name = 'guidebook'
-    color = Color.LIGHTMAGENTA
-    char = ':'
-
-class Corruptor(Device):
-    base_name = 'corruptor'
-    color = Color.RED
-
-class Offsetter(Device):
-    base_name = 'offsetter'
-    color = Color.YELLOW
-
-class Copier(Device):
-    base_name = 'copier'
-    color = Color.LIGHTBLUE
-
-class Palantir(Artifact):
-    base_name = 'palantir'
     @property
-    def color(self):
-        return random.choice([Color.BLUE, Color.LIGHTBLUE,
-                              Color.CYAN, Color.LIGHTCYAN])
-
-class GoldenCandle(Artifact):
-    base_name = 'golden candle'
+    def kind(self):
+        return self.byte >> 3
     @property
+    def enchanted(self):
+        return self.byte & 0x80
+    @property
+    def equipped(self):
+        return self.byte & 0x40
+    @property
+    def cursed(self):
+        return self.byte & 0x20
+
+    def is_weapon(self):
+        return self.kind in weapons
+    def is_body_armor(self):
+        return self.kind in body_armors
+    def is_necklace(self):
+        return self.kind in necklaces
+    def is_consumable(self):
+        return self.kind in consumables
+    def is_pill(self):
+        return self.kind in pills
+    def is_fruit(self):
+        return self.kind in fruits
+
+    def kind_name(self):
+        if self.kind == NO_ITEM:
+            return 'null'
+        elif self.kind == CROWBAR:
+            return 'crowbar'
+        elif self.kind == VOLCANIC_SHARD:
+            return 'volcanic shard'
+        elif self.kind == TASER:
+            return 'taser'
+        elif self.kind == JELLY_GUN:
+            return 'jelly gun'
+        elif self.kind == fruits[0]:
+            return 'akebi'
+        elif self.kind == fruits[1]:
+            return 'shikuwasa'
+        elif self.kind == fruits[2]:
+            return 'yuzu'
+        elif self.kind == CHARGE_PILL:
+            return 'charge pill'
+        elif self.kind == XP_UP_PILL:
+            return 'experience pill'
+        elif self.kind == HASTE_PILL:
+            return 'speed pill'
+        elif self.kind == IDENTIFY_PILL:
+            return 'knowledge pill'
+        elif self.kind == XP_DOWN_PILL:
+            return 'inexperience pill'
+        elif self.kind == POISON_PILL:
+            return 'poison pill'
+        elif self.kind == PROTECT_PILL:
+            return 'protection pill'
+        elif self.kind == TORMENT_PILL:
+            return 'radioactive pill'
+        elif self.kind == THICK_SWEATER:
+            return 'thick sweater'
+        elif self.kind == BALLISTIC_VEST:
+            return 'ballistic vest'
+        elif self.kind == DRAGON_SCALE_MAIL:
+            return 'dragon scale mail'
+        elif self.kind == TITANIUM_NECKLACE:
+            return 'titanium necklace'
+        elif self.kind == RUSTY_NECKLACE:
+            return 'rusty necklace'
+        elif self.kind == CRIMSON_NECKLACE:
+            return 'crimson necklace'
+        elif self.kind == GLOWING_NECKLACE:
+            return 'glowing necklace'
+        elif self.kind == UNHOLY_NECKLACE:
+            return 'unholy necklace'
+        elif self.kind == WAND_OF_DEATH:
+            return 'wand of death'
+        elif self.kind == MANUAL:
+            return 'manual'
+        elif self.kind == GUIDEBOOK:
+            return 'guidebook'
+        elif self.kind == CORRUPTOR:
+            return 'corruptor'
+        elif self.kind == OFFSETTER:
+            return 'offsetter'
+        elif self.kind == COPIER:
+            return 'copier'
+        elif self.kind == PALANTIR:
+            return 'palantir'
+        elif self.kind == GOLDEN_CANDLE:
+            return 'golden candle'
+
     def color(self):
-        return random.choice([Color.WHITE, Color.YELLOW, Color.LIGHTRED])
+        if self.is_pill():
+            return Color.WHITE
+        elif self.kind == NO_ITEM:
+            return curses.A_REVERSE
+        elif self.kind == CROWBAR:
+            return Color.LIGHTGRAY
+        elif self.kind == VOLCANIC_SHARD:
+            return Color.LIGHTRED
+        elif self.kind == TASER:
+            return Color.LIGHTCYAN
+        elif self.kind == JELLY_GUN:
+            return Color.LIGHTGREEN
+        elif self.kind == fruits[0]:
+            return Color.MAGENTA
+        elif self.kind == fruits[1]:
+            return Color.LIGHTGREEN
+        elif self.kind == fruits[2]:
+            return Color.YELLOW
+        elif self.kind == THICK_SWEATER:
+            return Color.MAGENTA
+        elif self.kind == BALLISTIC_VEST:
+            return Color.CYAN
+        elif self.kind == DRAGON_SCALE_MAIL:
+            return Color.GREEN
+        elif self.kind == TITANIUM_NECKLACE:
+            return Color.LIGHTGRAY
+        elif self.kind == RUSTY_NECKLACE:
+            return Color.BROWN
+        elif self.kind == CRIMSON_NECKLACE:
+            return Color.RED
+        elif self.kind == GLOWING_NECKLACE:
+            return Color.YELLOW
+        elif self.kind == UNHOLY_NECKLACE:
+            return Color.DARKGRAY
+        elif self.kind == WAND_OF_DEATH:
+            return Color.BLUE
+        elif self.kind == MANUAL:
+            return Color.BROWN
+        elif self.kind == GUIDEBOOK:
+            return Color.YELLOW
+        elif self.kind == CORRUPTOR:
+            return Color.LIGHTRED
+        elif self.kind == OFFSETTER:
+            return Color.LIGHTMAGENTA
+        elif self.kind == COPIER:
+            return Color.LIGHTBLUE
+        elif self.kind == PALANTIR:
+            return random.choice([Color.LIGHTBLUE, Color.BLUE,
+                                  Color.LIGHTCYAN, Color.CYAN])
+        elif self.kind == GOLDEN_CANDLE:
+            return random.choice([Color.LIGHTRED, Color.YELLOW,
+                                  Color.BROWN, Color.WHITE])
+
+    def char(self):
+        if self.is_weapon() or self.kind == WAND_OF_DEATH:
+            return CHAR_WEAPON
+        elif self.is_body_armor():
+            return CHAR_BODY_ARMOR
+        elif self.is_necklace():
+            return CHAR_NECKLACE
+        elif self.is_pill() or self.is_fruit():
+            return CHAR_FOOD
+        elif self.kind == PALANTIR or self.kind == GOLDEN_CANDLE:
+            return CHAR_ARTIFACT
+        else:
+            return CHAR_MISC
+
