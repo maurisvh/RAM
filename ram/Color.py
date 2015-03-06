@@ -2,10 +2,6 @@ import curses
 
 # We need to call curses.initscr before we can initialize these.
 def initialize():
-    global BLUE, GREEN, CYAN, RED, MAGENTA, BROWN, LIGHTGRAY
-    global DARKGRAY, LIGHTBLUE, LIGHTGREEN, LIGHTCYAN, LIGHTRED
-    global LIGHTMAGENTA, YELLOW, WHITE
-
     curses.init_pair(1, curses.COLOR_BLUE,    curses.COLOR_BLACK)
     curses.init_pair(2, curses.COLOR_GREEN,   curses.COLOR_BLACK)
     curses.init_pair(3, curses.COLOR_CYAN,    curses.COLOR_BLACK)
@@ -14,6 +10,11 @@ def initialize():
     curses.init_pair(6, curses.COLOR_YELLOW,  curses.COLOR_BLACK)
     curses.init_pair(7, curses.COLOR_WHITE,   curses.COLOR_BLACK)
     curses.init_pair(8, curses.COLOR_BLACK,   curses.COLOR_BLACK)
+
+def define_colors(stdscr):
+    global BLUE, GREEN, CYAN, RED, MAGENTA, BROWN, LIGHTGRAY
+    global DARKGRAY, LIGHTBLUE, LIGHTGREEN, LIGHTCYAN, LIGHTRED
+    global LIGHTMAGENTA, YELLOW, WHITE
 
     BLUE         = curses.color_pair(1)
     GREEN        = curses.color_pair(2)
@@ -30,3 +31,5 @@ def initialize():
     LIGHTMAGENTA = curses.color_pair(5) | curses.A_BOLD
     YELLOW       = curses.color_pair(6) | curses.A_BOLD
     WHITE        = curses.color_pair(7) | curses.A_BOLD
+
+curses.wrapper(define_colors)
