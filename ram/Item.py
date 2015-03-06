@@ -46,6 +46,8 @@ TORMENT_PILL      = p[7] -c;  GOLDEN_CANDLE     = 0x1F
 del f, p, Flag, w, b, n, c
 ######################################################################
 
+identified = set()
+
 class Item:
     def __init__(self, byte):
         self.byte = byte
@@ -69,6 +71,8 @@ class Item:
         return self.kind in body_armors
     def is_necklace(self):
         return self.kind in necklaces
+    def is_equip(self):
+        return self.is_weapon() or self.is_body_armor() or self.necklace()
     def is_consumable(self):
         return self.kind in consumables
     def is_pill(self):
@@ -78,7 +82,7 @@ class Item:
 
     def kind_name(self):
         if self.kind == NO_ITEM:
-            return 'null'
+            raise ValueError
         elif self.kind == CROWBAR:
             return 'crowbar'
         elif self.kind == VOLCANIC_SHARD:
@@ -87,28 +91,42 @@ class Item:
             return 'taser'
         elif self.kind == JELLY_GUN:
             return 'jelly gun'
+        elif self.kind == FULL_HP_FRUIT and self.known():
+            return 'full-healing fruit'
+        elif self.kind == FULL_TP_FRUIT and self.known():
+            return 'energizing fruit'
+        elif self.kind == HALF_HP_FRUIT and self.known():
+            return 'healing fruit'
         elif self.kind == fruits[0]:
             return 'akebi'
         elif self.kind == fruits[1]:
             return 'shikuwasa'
         elif self.kind == fruits[2]:
             return 'yuzu'
-        elif self.kind == CHARGE_PILL:
+        elif self.kind == CHARGE_PILL and self.known():
             return 'charge pill'
-        elif self.kind == XP_UP_PILL:
+        elif self.kind == XP_UP_PILL and self.known():
             return 'experience pill'
-        elif self.kind == HASTE_PILL:
+        elif self.kind == HASTE_PILL and self.known():
             return 'speed pill'
-        elif self.kind == IDENTIFY_PILL:
+        elif self.kind == IDENTIFY_PILL and self.known():
             return 'knowledge pill'
-        elif self.kind == XP_DOWN_PILL:
+        elif self.kind == XP_DOWN_PILL and self.known():
             return 'inexperience pill'
-        elif self.kind == POISON_PILL:
+        elif self.kind == POISON_PILL and self.known():
             return 'poison pill'
-        elif self.kind == PROTECT_PILL:
+        elif self.kind == PROTECT_PILL and self.known():
             return 'protection pill'
-        elif self.kind == TORMENT_PILL:
+        elif self.kind == TORMENT_PILL and self.known():
             return 'radioactive pill'
+        elif self.kind in pills:
+            descs = ['round', 'tiny', 'diamond', 'oblong',
+                     'soft', 'hard', 'wide', 'translucent']
+            return descs[pills.index(self.kind)] + ' pill'
+        elif self.kind == fruits[1]:
+            return 'shikuwasa'
+        elif self.kind == fruits[2]:
+            return 'yuzu'
         elif self.kind == THICK_SWEATER:
             return 'thick sweater'
         elif self.kind == BALLISTIC_VEST:
@@ -142,11 +160,25 @@ class Item:
         elif self.kind == GOLDEN_CANDLE:
             return 'golden candle'
 
+    def name(self):
+        s = self.kind_name()
+        if self.is_equip():
+            if self.enchanted:
+                s = 'enchanted ' + s
+            if self.equipped:
+                s += ' (equipped)'
+        if self.cursed:
+            s = 'cursed ' + s
+        if s[0].lower() in 'aeiou':
+            return 'an ' + s
+        else:
+            return 'a ' + s
+
     def color(self):
         if self.is_pill():
             return Color.WHITE
         elif self.kind == NO_ITEM:
-            return curses.A_REVERSE
+            raise ValueError
         elif self.kind == CROWBAR:
             return Color.LIGHTGRAY
         elif self.kind == VOLCANIC_SHARD:
@@ -197,7 +229,9 @@ class Item:
                                   Color.BROWN, Color.WHITE])
 
     def char(self):
-        if self.is_weapon() or self.kind == WAND_OF_DEATH:
+        if self.kind == NO_ITEM:
+            raise ValueError
+        elif self.is_weapon() or self.kind == WAND_OF_DEATH:
             return CHAR_WEAPON
         elif self.is_body_armor():
             return CHAR_BODY_ARMOR
