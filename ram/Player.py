@@ -2,6 +2,9 @@ from Actor import Actor
 import Element
 import Timer
 import Color
+import memory
+
+import sys
 
 class Player(Actor):
     def __init__(self):
@@ -48,6 +51,24 @@ class Player(Actor):
         self.timer_delta = 0xFF
         self.damage_offset = 0x00
         self.text_sync = 0x00
+
+    def read_memory(self, p):
+        return memory.read_memory(self, p)
+
+    def write_memory(self, p, value):
+        return memory.write_memory(self, p, value)
+
+    @property
+    def name_str(self):
+        # Simulate buffer overflows.
+        s = []; p = memory.addr_player_name[0]
+        sys.stderr.write(repr(s) + '\n')
+        while True:
+            c = self.read_memory(p)
+            if c == 0:
+                return ''.join(s)
+            s.append(chr(c))
+            p += 1
 
     @property
     def color(self):

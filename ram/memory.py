@@ -1,4 +1,3 @@
-from Player import Player
 import Spell
 import Element
 import Timer
