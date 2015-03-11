@@ -1,6 +1,9 @@
+import Board
 import Spell
 import Element
 import Timer
+import Item
+
 from messages import msg
 
 # 00 = Player appearance.
@@ -96,18 +99,24 @@ def read_memory(player, addr):
     elif addr == addr_spell_memory:
         return player.spell_memory_byte
     elif addr in addr_identify:
-        raise NotImplementedError()
+        v = 0
+        offset = addr_identify[addr]
+        for i in range(offset, offset + 8):
+            v <<= 1
+            if i in Item.identified:
+                v |= 1
+        return v
     elif addr in addr_timers:
         timer = addr_timers[addr]
         return player.timers[timer]
     elif addr in addr_inventory:
-        raise NotImplementedError()
+        return player.inventory[addr_inventory[addr]]
     elif addr == addr_door_appearance:
-        raise NotImplementedError()
+        return Board.door_appearance
     elif addr == addr_wall_appearance:
-        raise NotImplementedError()
+        return Board.wall_appearance
     elif addr == addr_floor_color:
-        raise NotImplementedError()
+        return Board.floor_color
     elif addr == addr_dlvl_delta:
         return player.dlvl_delta
     elif addr == addr_timer_delta:
@@ -158,6 +167,15 @@ def describe_player(byte):
     ][byte >> 3]
     return (col, noun)
 
+def bits(n):
+    """Return a list of set bits in n, e.g. bits(0b11001) == [0, 3, 4]"""
+    res = []
+    while n > 0:
+        if n & 1:
+            res.append(i)
+        n >>= 1
+    return res
+
 def write_memory(player, addr, value):
     assert 0x00 <= value <= 0xFF
 
@@ -180,21 +198,114 @@ def write_memory(player, addr, value):
     elif addr in addr_player_name:
         idx = addr - addr_player_name[0]
         player.name[idx] = value
+
     elif addr in addr_mon_flags:
         raise NotImplementedError()
     elif addr in addr_mon_pos:
         raise NotImplementedError()
     elif addr in addr_mon_hp:
         raise NotImplementedError()
+
     elif addr == addr_spell_memory:
-        raise NotImplementedError()
+        old = player.spell_memory_byte
+        for i in bits(old & ~value):
+            sp = Spell.spells[i].name
+            msg('You forget how to cast {0}.'.format(sp), Color.RED)
+        for i in bits(value & ~old):
+            sp = Spell.spells[i].name
+            msg('You learn how to cast {0}.'.format(sp), Color.CYAN)
+        player.spell_memory_byte = value
+
     elif addr in addr_identify:
-        raise NotImplementedError()
+        offset = addr_identify[offset]
+        old = 0
+        for i in range(offset, offset + 8):
+            old <<= 1
+            if i in Item.identified:
+                old |= 1
+        lose = old & ~value
+        gain = value & ~old
+
+        if lose and gain:
+            msg('Your knowledge of items shifts around.', Color.MAGENTA)
+        elif lose:
+            msg('Your knowledge of items grows weaker.', Color.RED)
+        elif gain:
+            msg('Your knowledge of items grows stronger.', Color.GREEN)
+
+        for i in bits(lose):
+            Item.identified.remove(i + offset)
+        for i in bits(gain):
+            Item.identified.add(i + offset)
+
     elif addr in addr_timers:
-        raise NotImplementedError()
+        t = addr_timers[addr]
+        old = player.timers[t]
+        if t is Timer.POISON:
+            if new > old:
+                if old == 0:
+                    msg('You feel poisoned.', Color.RED)
+                else:
+                    msg('You feel even more poisoned.', Color.RED)
+            elif new < old:
+                if new == 0:
+                    msg('You feel better.', Color.RED)
+                else:
+                    msg('You feel less poisoned.')
+        elif t is Timer.HASTE:
+            if new > old:
+                if old == 0:
+                    msg('You feel fast!', Color.GREEN)
+                else:
+                    msg('You feel even faster!', Color.GREEN)
+            elif new < old:
+                if new == 0:
+                    msg('Your speed returns to normal.', Color.RED)
+                else:
+                    msg('You feel slower.', Color.RED)
+        elif t is Timer.CHARGE:
+            if new > old:
+                if old == 0:
+                    msg('You feel strong!', Color.GREEN)
+                else:
+                    msg('You feel even stronger!', Color.GREEN)
+            elif new < old:
+                if new == 0:
+                    msg('Your strength returns to normal.', Color.RED)
+                else:
+                    msg('You feel weaker.', Color.RED)
+        elif t is Timer.PROTECT:
+            if new > old:
+                if old == 0:
+                    msg('You feel protected!', Color.GREEN)
+                else:
+                    msg('You feel even more protected!', Color.GREEN)
+            elif new < old:
+                if new == 0:
+                    msg('Your defenses return to normal.', Color.RED)
+                else:
+                    msg('You feel more vulnerable.', Color.RED)
+        player.timers[t] = value
+
     elif addr in addr_inventory:
-        raise NotImplementedError()
+        i = addr_inventory[addr]
+        old = player.inventory[i]
+        new = Item.Item(value)
+
+        # TODO: talk about what happens to equipment status?
+        if old.kind == Item.NO_ITEM and new.kind != Item.NO_ITEM:
+            msg('You suddenly have {0}!'.format(new.name()), Color.CYAN)
+        elif new.kind == Item.NO_ITEM:
+            msg('{0} suddenly disappears!'.format(old.name('Your')),
+                    Color.RED)
+        elif old.kind == new.kind and old.byte != new.byte:
+            msg('{0} looks different.'.format(old.name('Your')),
+                    Color.CYAN)
+        else:
+            msg('{0} changes into {1}!'.format(old.name('Your'),
+                new.name()), Color.CYAN)
     elif addr == addr_door_appearance:
+        # Probably implement LOS first
         raise NotImplementedError()
     elif addr == addr_wall_appearance:
         raise NotImplementedError()
