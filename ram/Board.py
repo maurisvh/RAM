@@ -87,6 +87,23 @@ class Board:
         h = Board.HEIGHT
         return '\n'.join(''.join(self.tiles[i*w:(i+1)*w]) for i in range(h))
 
+    def char_at(self, x, y):
+        if (x, y) in self.items:
+            return '*' # TODO
+        elif self[x, y] == '#':  return '#'
+        elif self[x, y] == '.':  return '.'
+        elif self[x, y] == '+':  return '+'
+        elif self[x, y] in '<>': return self[x, y]
+
+    def color_at(self, x, y):
+        if (x, y) in self.items:
+            return Color.BLUE # TODO
+        elif self[x, y] == '#':  return Color.BROWN
+        elif self[x, y] == '.':  return Color.LIGHTGRAY
+        elif self[x, y] == '+':  return Color.WHITE
+        elif self[x, y] in '<>': return Color.LIGHTCYAN
+
+
 def make_dungeon():
     # Parse level layouts
     descs = []
