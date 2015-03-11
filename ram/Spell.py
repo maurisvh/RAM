@@ -15,3 +15,4 @@ REV = Spell('REV', 'Reverses the bits of the target value.')
 WLN = Spell('WLN', 'Rewrite the lower nibble of the target value freely.')
 WHN = Spell('WHN', 'Rewrite the higher nibble of the target value freely.')
 
+spells = [ONE, CLO, INC, CPN, A9D, REV, WLN, WHN]
