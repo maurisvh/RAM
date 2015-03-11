@@ -2,13 +2,23 @@ from constants import *
 from util import coinflip
 from string import ascii_uppercase
 
+import Color
+
+import curses
 import random
+
+# 5 bits char (down from '@'), 3 bits col (up from darkblue)
+door_appearance = 0b10101101
+# 5 bits char (down from '@'), 3 bits col (up from darkgray)
+wall_appearance = 0b11101111
+# 3 bits col (up from darkblue)
+floor_color = 0b000
 
 # Tiles are:
 #  .  floor
-#  +  closed door
+#  +  closed door (can change)
 # (\  open door)
-#  #  wall
+#  #  wall (can change)
 #  <  stairs up
 #  >  stairs down
 
