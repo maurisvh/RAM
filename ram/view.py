@@ -108,7 +108,7 @@ def update_status(win_status, player):
     # Put the RAM table right below the HUD.
     # XXX: what about items? other dialog boxes?
 
-    if not player.show_ram:
+    if player.show_ram:
         ram_y = y + 2
         ram_width = 8 * 3 - 1
         ram_x = (WIN_STATUS_WIDTH - ram_width) // 2
@@ -151,7 +151,6 @@ def update_screen(stdscr, player, dungeon):
     win_text = curses.newwin(WIN_TEXT_HEIGHT, WIN_TEXT_WIDTH,
                              WIN_TEXT_Y, WIN_TEXT_X)
 
-    #win_status.border()
     win_status.refresh()
     for y in range(WIN_GAME_BOX_HEIGHT):
         for x in range(WIN_GAME_BOX_WIDTH):
@@ -162,14 +161,5 @@ def update_screen(stdscr, player, dungeon):
 
     update_status(win_status, player)
     update_map(win_game, player, dungeon)
-
-    #stdscr.clear()
-    #for i in range(1,0x20):
-    #    it = Item.Item(i << 3)
-    #    stdscr.addstr(i % 16 + 3, i // 16 * 25 + 17,
-    #            it.char() + ' ', it.color())
-    #    for c in it.kind_name():
-    #        stdscr.addstr(c, it.color())
-    #stdscr.refresh()
 
     stdscr.getch()
