@@ -3,6 +3,8 @@ import Element
 
 import curses
 import random
+import re
+
 CHAR_WEAPON     = '/'
 CHAR_BODY_ARMOR = '['
 CHAR_NECKLACE   = '"'
@@ -55,15 +57,27 @@ class Item:
     @property
     def kind(self):
         return self.byte >> 3
+    @kind.setter
+    def kind(self, value):
+        self.byte = (self.byte & 0b00000111) | (value << 3)
     @property
     def enchanted(self):
-        return self.byte & 0x80
+        return self.byte & 0b100
+    @enchanted.setter
+    def enchanted(self, value):
+        self.byte = (self.byte & ~0b100) | (int(value) << 2)
     @property
     def equipped(self):
-        return self.byte & 0x40
+        return self.byte & 0b010
+    @equipped.setter
+    def equipped(self, value):
+        self.byte = (self.byte & ~0b010) | (int(value) << 1)
     @property
     def cursed(self):
-        return self.byte & 0x20
+        return self.byte & 0b001
+    @cursed.setter
+    def cursed(self, value):
+        self.byte = (self.byte & ~0b001) | (int(value) << 0)
 
     def is_weapon(self):
         return self.kind in weapons
@@ -72,13 +86,16 @@ class Item:
     def is_necklace(self):
         return self.kind in necklaces
     def is_equip(self):
-        return self.is_weapon() or self.is_body_armor() or self.necklace()
+        return self.is_weapon() or self.is_body_armor() \
+               or self.is_necklace()
     def is_consumable(self):
         return self.kind in consumables
     def is_pill(self):
         return self.kind in pills
     def is_fruit(self):
         return self.kind in fruits
+    def known(self):
+        return self.kind in identified
 
     def kind_name(self):
         if self.kind == NO_ITEM:
@@ -123,10 +140,6 @@ class Item:
             descs = ['round', 'tiny', 'diamond', 'oblong',
                      'soft', 'hard', 'wide', 'translucent']
             return descs[pills.index(self.kind)] + ' pill'
-        elif self.kind == fruits[1]:
-            return 'shikuwasa'
-        elif self.kind == fruits[2]:
-            return 'yuzu'
         elif self.kind == THICK_SWEATER:
             return 'thick sweater'
         elif self.kind == BALLISTIC_VEST:
@@ -160,19 +173,42 @@ class Item:
         elif self.kind == GOLDEN_CANDLE:
             return 'golden candle'
 
-    def name(self):
+    def name(self, article=None):
         s = self.kind_name()
         if self.is_equip():
             if self.enchanted:
                 s = 'enchanted ' + s
             if self.equipped:
                 s += ' (equipped)'
-        if self.cursed:
+        if self.cursed and not self.is_fruit():
             s = 'cursed ' + s
-        if s[0].lower() in 'aeiou':
+        if article == '':
+            return s
+        elif article is not None:
+            return article + ' ' + s
+        elif s[0].lower() in 'aeiou':
             return 'an ' + s
         else:
             return 'a ' + s
+
+    def compressed_name(self):
+        name = self.name('')
+        if len(name) <= 30: return name
+        name = name.replace('(equipped)', '(eq)')
+        if len(name) <= 30: return name
+        name = name.replace(r'necklace', 'neckl.')
+        if len(name) <= 30: return name
+        name = name.replace(r'dragon scale ', 'drag.s.')
+        if len(name) <= 30: return name
+        name = name.replace(r'ballistic ', 'ball.')
+        if len(name) <= 30: return name
+        name = name.replace(r'volcanic ', 'volc.')
+        if len(name) <= 30: return name
+        name = name.replace(r'enchanted', 'ench')
+        if len(name) <= 30: return name
+        name = name.replace(r'cursed', 'crsd')
+        if len(name) <= 30: return name
+        raise ValueError(name)
 
     def color(self):
         if self.is_pill():
@@ -243,4 +279,37 @@ class Item:
             return CHAR_ARTIFACT
         else:
             return CHAR_MISC
+
+    def defense(self):
+        if self.kind == THICK_SWEATER:
+            return 2
+        elif self.kind == BALLISTIC_VEST:
+            return 4
+        elif self.kind == DRAGON_SCALE_MAIL:
+            return 6
+        else:
+            return 0
+
+    def element_bonus(self, element):
+        me, ac, fi, el = (Element.METAL, Element.ACID,
+                          Element.FIRE, Element.ELEC)
+        if self.kind == THICK_SWEATER:
+            v = {me: 0, ac: 0, fi: 2, el: -2}
+        elif self.kind == BALLISTIC_VEST:
+            v = {me: 2, ac: -2, fi: 0, el: 0}
+        elif self.kind == DRAGON_SCALE_MAIL:
+            v = {me: 0, ac: 2, fi: -2, el: 0}
+        elif self.kind == TITANIUM_NECKLACE:
+            v = {me: 3, ac: -1, fi: -1, el: -1}
+        elif self.kind == RUSTY_NECKLACE:
+            v = {me: -1, ac: 3, fi: -1, el: -1}
+        elif self.kind == CRIMSON_NECKLACE:
+            v = {me: -1, ac: -1, fi: 3, el: -1}
+        elif self.kind == GLOWING_NECKLACE:
+            v = {me: -1, ac: -1, fi: -1, el: 3}
+        elif self.kind == RUSTY_NECKLACE:
+            v = {me: -3, ac: -3, fi: -3, el: -3}
+        else:
+            v = {me: 0, ac: 0, fi: 0, el: 0}
+        return v[element]
 
