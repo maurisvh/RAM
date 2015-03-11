@@ -2,8 +2,10 @@ from Actor import Actor
 import Element
 import Timer
 import Color
+import Item
 import memory
 
+import random
 import sys
 
 class Player(Actor):
@@ -21,12 +23,8 @@ class Player(Actor):
         self.tp = 10
         # 0 (death) to 15
         self.xl = 1
-        # 0 (no defense) to 15
-        self.defense = 1
-
-        self.appearance_byte = 0
-        self.display_byte = 0
-        self.spell_memory_byte = 0
+        # -8 (no defense) to 7
+        self.defense = 0
 
         # Elemental aptitudes (-8 to 7)
         self.aptitude = {
@@ -35,6 +33,17 @@ class Player(Actor):
             Element.FIRE:  0,
             Element.ELEC:  0,
         }
+
+        self.inventory = [Item.Item(random.randint(0, 255)) for i in range(8)]
+        #self.inventory[0].kind = Item.CROWBAR
+        #self.inventory[0] = Item.Item(0xFF)
+        #self.equip(0)
+
+        [Item.Item(i).compressed_name() for i in range(8, 256)]
+
+        self.appearance_byte = 0
+        self.display_byte = 0
+        self.spell_memory_byte = 0
 
         # Timers (0 to 255)
         self.timers = {
@@ -51,6 +60,9 @@ class Player(Actor):
         self.timer_delta = 0xFF
         self.damage_offset = 0x00
         self.text_sync = 0x00
+
+        # Interface
+        self.show_ram = False
 
     def read_memory(self, p):
         return memory.read_memory(self, p)
@@ -91,3 +103,32 @@ class Player(Actor):
     def maxtp(self):
         # TODO
         return 10
+
+    def equip(self, index):
+        item = self.inventory[index]
+        assert item is not None
+        assert not item.equipped
+
+        def remove_obj(self, obj):
+            obj.equipped = False
+            for element in self.aptitude:
+                self.aptitude[element] -= obj.element_bonus(element)
+            self.defense -= obj.defense()
+
+        for j, o in enumerate(self.inventory):
+            if index == j:
+                continue
+            if item.is_weapon() and o.is_weapon() and o.equipped:
+                msg('You unwield {0}.'.format(o.name('your')))
+                remove_obj(self, o)
+            elif item.is_necklace() and o.is_necklace() and o.equipped:
+                msg('You remove {0}.'.format(o.name('your')))
+                remove_obj(self, o)
+            elif item.is_body_armor() and o.is_body_armor() and o.equipped:
+                msg('You take off {0}.'.format(o.name('your')))
+                remove_obj(self, o)
+        
+        item.equipped = True
+        for element in self.aptitude:
+            self.aptitude[element] += item.element_bonus(element)
+        self.defense += item.defense()
