@@ -17,11 +17,6 @@ def main(stdscr):
     dungeon = make_dungeon()
     player.pos = dungeon[0].stairs_up
 
-    # memory.write_memory(player, memory.addr_player_appearance, 41)
-    # memory.write_memory(player, memory.addr_player_appearance, 41+64)
-    # for i, line in enumerate(messages):
-    #     stdscr.addstr(i, 0, line[0])
-    # stdscr.addstr(9, 9, player.char, player.color)
     view.update_screen(stdscr, player, dungeon)
 
 if __name__ == '__main__':
