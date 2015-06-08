@@ -54,6 +54,43 @@ class Item:
     def __init__(self, byte):
         self.byte = byte
 
+    @staticmethod
+    def generate(depth):
+        weights = [
+            (CROWBAR, 10),                  (THICK_SWEATER, 8),
+            (VOLCANIC_SHARD, 7 + 1*depth),  (BALLISTIC_VEST, 6 + depth),
+            (TASER, 4 + 2*depth),           (DRAGON_SCALE_MAIL, 3*depth),
+            (JELLY_GUN, 1 + 3*depth),       (TITANIUM_NECKLACE, 3),
+            (FULL_HP_FRUIT, 10 - depth),    (RUSTY_NECKLACE, 3),
+            (FULL_TP_FRUIT, 10 - depth),    (CRIMSON_NECKLACE, 3),
+            (HALF_HP_FRUIT, 20 - depth),    (GLOWING_NECKLACE, 3),
+            (CHARGE_PILL, 6),               (UNHOLY_NECKLACE, 3),
+            (XP_UP_PILL, 4),                (WAND_OF_DEATH, 3),
+            (HASTE_PILL, 6),                (MANUAL, 3),
+            (IDENTIFY_PILL, 12),            (GUIDEBOOK, 2),
+            (XP_DOWN_PILL, 8),              (CORRUPTOR, 2),
+            (POISON_PILL, 8),               (OFFSETTER, 2),
+            (PROTECT_PILL, 6),              (COPIER, 2),
+            (TORMENT_PILL, 4),
+        ]
+        
+        item = Item(0)
+        w = random.randrange(sum(n for x, n in weights))
+        for gen_kind, n in weights:
+            w -= n
+            if w <= 0:
+                break
+
+        item.kind = gen_kind
+
+        if gen_kind == UNHOLY_NECKLACE or item.is_equip() and \
+                random.random() < 0.1:
+            item.cursed = True
+        if item.is_equip() and random.random() < 0.1:
+            item.enchanted = True
+
+        return item
+
     @property
     def kind(self):
         return self.byte >> 3
@@ -193,21 +230,19 @@ class Item:
 
     def compressed_name(self):
         name = self.name('')
-        if len(name) <= 30: return name
-        name = name.replace('(equipped)', '(eq)')
-        if len(name) <= 30: return name
-        name = name.replace(r'necklace', 'neckl.')
-        if len(name) <= 30: return name
-        name = name.replace(r'dragon scale ', 'drag.s.')
-        if len(name) <= 30: return name
-        name = name.replace(r'ballistic ', 'ball.')
-        if len(name) <= 30: return name
-        name = name.replace(r'volcanic ', 'volc.')
-        if len(name) <= 30: return name
-        name = name.replace(r'enchanted', 'ench')
-        if len(name) <= 30: return name
-        name = name.replace(r'cursed', 'crsd')
-        if len(name) <= 30: return name
+        max_len = 30
+        if len(name) <= max_len:
+            return name
+        repls = [('(equipped)', '(eq)'),
+                 ('necklace', 'neckl.'),
+                 ('dragon scale ', 'drag.sc.'),
+                 ('ballistic ', 'ball.'),
+                 ('volcanic ', 'volc.'),
+                 ('enchanted', 'ench'),
+                 ('cursed', 'crsd')]
+        for a, b in repls:
+            name = name.replace(a, b)
+            if len(name) <= max_len: return name
         raise ValueError(name)
 
     def color(self):
