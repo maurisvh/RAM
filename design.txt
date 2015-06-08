@@ -121,3 +121,52 @@ Spells:
 Monsters:
 00 = no monster
 01 = 
+
+Kestrel
+* token slow weak monster
+
+Skeleton
+* bland warrior
+
+Troll
+* troll (regen melee)
+
+Android
+* metal melee monster
+
+Jelly
+* slime spit monster
+
+Salamander
+* fire poison monster
+
+Tiny UFO
+* paralyzing elec monster
+
+Minotaur
+* OOD wall slam thing
+
+Glitch
+* bit corruptor
+
+Witch
+* convoker
+
+Ghost
+* scary XL drainer (run)
+
+Soldier
+* "smart" ranged AI things (sil)
+
+Attractor
+* magnet monsters? nethacky sirens attracting iron objects
+
+Turret
+* turret (can't move, but large range damage in an area -- disable it)
+
+Elf
+* ally?
+
+Golden dragon
+* golden dragon (melee instakill, invincible, guards amulet)
+
