@@ -1,14 +1,14 @@
-from Actor import Actor
 import Element
 import Timer
 import Color
 import Item
 import memory
+from messages import msg
 
 import random
 import sys
 
-class Player(Actor):
+class Player:
     def __init__(self):
         self.pos = None
         self.dlvl = 0
@@ -34,12 +34,10 @@ class Player(Actor):
             Element.ELEC:  0,
         }
 
-        self.inventory = [Item.Item(random.randint(0, 255)) for i in range(8)]
+        self.inventory = [Item.Item.generate(0) for i in range(8)]
         #self.inventory[0].kind = Item.CROWBAR
         #self.inventory[0] = Item.Item(0xFF)
         #self.equip(0)
-
-        [Item.Item(i).compressed_name() for i in range(8, 256)]
 
         self.appearance_byte = 0
         self.display_byte = 0
@@ -74,7 +72,6 @@ class Player(Actor):
     def name_str(self):
         # Simulate buffer overflows.
         s = []; p = memory.addr_player_name[0]
-        sys.stderr.write(repr(s) + '\n')
         while True:
             c = self.read_memory(p)
             if c == 0:
@@ -82,14 +79,12 @@ class Player(Actor):
             s.append(chr(c))
             p += 1
 
-    @property
     def color(self):
         c = self.appearance_byte & 0x07
         return [Color.WHITE, Color.YELLOW, Color.LIGHTMAGENTA,
                 Color.LIGHTRED, Color.LIGHTCYAN, Color.LIGHTGREEN,
                 Color.LIGHTBLUE, Color.DARKGRAY][c]
 
-    @property
     def char(self):
         c = self.appearance_byte >> 3
         return chr(ord('@') - c)
@@ -127,8 +122,42 @@ class Player(Actor):
             elif item.is_body_armor() and o.is_body_armor() and o.equipped:
                 msg('You take off {0}.'.format(o.name('your')))
                 remove_obj(self, o)
-        
+
         item.equipped = True
         for element in self.aptitude:
             self.aptitude[element] += item.element_bonus(element)
         self.defense += item.defense()
+
+    def move(self, level, pos):
+        self.pos = pos
+        feat = level[pos]
+        item = level.items.get(pos)
+        if item:
+            msg('You see here {0}.'.format(item.name()))
+        if feat in '<>':
+            d = self.dlvl_delta
+            if feat == '<':
+                d *= -1
+            goal = (self.dlvl + d) & 0xFF
+            msg('There is a staircase to level {0} here.'.format(goal))
+
+    def step(self, level, dx, dy):
+        """Return whether a turn was passed."""
+        x, y = self.pos
+        goal = (x + dx, y + dy)
+        feat = level[goal]
+        if feat == '+':
+            level.tiles[goal] = "'"
+            msg('You open the door.')
+            return True
+        elif feat.isdigit():
+            bit = 1 << int(feat)
+            new_state = 'off' if self.address & bit else 'on'
+            msg('You turn the BIT{0} switch {1}.'.format(feat, new_state))
+            self.address ^= bit
+            return True
+        elif feat == '#':
+            return False
+        else:
+            self.move(level, goal)
+            return True
