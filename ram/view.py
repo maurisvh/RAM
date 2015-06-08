@@ -4,6 +4,8 @@ import Color
 import Element
 import Item
 from constants import *
+from messages import msg, messages
+import memory
 import random
 
 # Screen dimensions.
@@ -19,7 +21,7 @@ import random
 
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 24
-WIN_STATUS_WIDTH = 35
+WIN_STATUS_WIDTH = 40
 WIN_TEXT_HEIGHT = 6
 
 # Align everything else.
@@ -33,8 +35,14 @@ WIN_GAME_BOX_X = WIN_STATUS_WIDTH
 WIN_GAME_BOX_Y = WIN_STATUS_Y
 WIN_GAME_BOX_WIDTH = SCREEN_WIDTH - WIN_STATUS_WIDTH
 WIN_GAME_BOX_HEIGHT = WIN_STATUS_HEIGHT
+WIN_GAME_Y = (WIN_GAME_BOX_HEIGHT - Board.HEIGHT) // 2
+WIN_GAME_X = (WIN_GAME_BOX_WIDTH - Board.WIDTH) // 2
 
-def update_status(win_status, player):
+win_status = None
+win_game = None
+win_text = None
+
+def update_status(player):
     caption_colour = Color.DARKGRAY
     value_colour = Color.LIGHTGRAY
     win_status.addstr(0, 0, '!', Color.BLACK)
@@ -74,7 +82,7 @@ def update_status(win_status, player):
         return show
 
     def show_name(y, x):
-        win_status.addstr(y, x, player.char + ' ', player.color)
+        win_status.addstr(y, x, player.char() + ' ', player.color())
         win_status.addstr(player.name_str, Color.LIGHTCYAN)
 
     show_hp = writes_ratio('HP: ',player.hp, player.maxhp)
@@ -105,21 +113,35 @@ def update_status(win_status, player):
         if fL: fL(y, 2)
         if fR: fR(y, 2 + m)
 
-    # Put the RAM table right below the HUD.
-    # XXX: what about items? other dialog boxes?
-
     if player.show_ram:
-        ram_y = y + 2
-        ram_width = 8 * 3 - 1
+        ram_y = y + 3
+        ram_width = 8 * 4 + 3
         ram_x = (WIN_STATUS_WIDTH - ram_width) // 2
         for i in range(0x40):
             y = ram_y + i // 8
-            x = ram_x + i % 8 * 3
-            byte = random.randint(0, 255)
+            x = ram_x + (i % 8 + 1) * 4 + 1
+            try:
+                byte = memory.read_memory(player, i)
+            except NotImplementedError:
+                byte = random.randint(0, 255)
             attr = Color.CYAN
             if i == player.address:
                 attr = Color.LIGHTGRAY | curses.A_REVERSE
             win_status.addstr(y, x, "{:02X}".format(byte), attr)
+        for i in range(8):
+            attr = Color.BLUE
+            if player.address & 0b000111 == i:
+                attr |= curses.A_REVERSE
+            win_status.addstr(ram_y - 1, ram_x + (i + 1) * 4,
+                              "{:03b}".format(i), attr)
+            attr = Color.MAGENTA
+            if player.address & 0b111000 == i << 3:
+                attr |= curses.A_REVERSE
+            win_status.addstr(ram_y + i, ram_x,
+                              "{:03b}".format(i), attr)
+        win_status.move(ram_y + 8, ram_x)
+        win_status.clrtoeol()
+        win_status.addstr(memory.address_name(player.address), Color.LIGHTBLUE)
     else:
         item_y = y + 2
         for i in range(8):
@@ -133,33 +155,48 @@ def update_status(win_status, player):
 
     win_status.refresh()
 
-def update_map(win_game, player, dungeon):
+def update_map(player, dungeon):
     board = dungeon[player.dlvl]
     for y in range(Board.HEIGHT):
         for x in range(Board.WIDTH):
-            win_game.insstr(y, x, board.char_at(x, y), board.color_at(x, y))
+            # XXX TERA-HACK: this has side effects that char_at relies on.
+            # Otherwise I'd have to call los() twice.
+            col = board.color_at(player, (x, y))
+            win_game.insstr(y, x, board.char_at(player, (x, y)), col)
     win_game.refresh()
 
-def update_screen(stdscr, player, dungeon):
+def prompt(s, col=None):
+    msg(s, col)
+    view.update_text()
+
+def update_text():
+    for m, col in messages:
+        win_text.scroll(1)
+        win_text.insstr(WIN_TEXT_HEIGHT - 1, 0, m, col)
+    del messages[:]
+    win_text.refresh()
+
+def init_screen(stdscr):
+    global win_status, win_game, win_text
     win_status = curses.newwin(WIN_STATUS_HEIGHT, WIN_STATUS_WIDTH,
                                WIN_STATUS_Y, WIN_STATUS_X)
     win_game_box = curses.newwin(WIN_GAME_BOX_HEIGHT, WIN_GAME_BOX_WIDTH,
                                  WIN_GAME_BOX_Y, WIN_GAME_BOX_X)
     win_game = win_game_box.derwin(Board.HEIGHT, Board.WIDTH,
-                   (WIN_GAME_BOX_HEIGHT - Board.HEIGHT) // 2,
-                   (WIN_GAME_BOX_WIDTH - Board.WIDTH) // 2)
+                                   WIN_GAME_Y, WIN_GAME_X)
     win_text = curses.newwin(WIN_TEXT_HEIGHT, WIN_TEXT_WIDTH,
                              WIN_TEXT_Y, WIN_TEXT_X)
+    win_text.scrollok(True)
 
-    win_status.refresh()
     for y in range(WIN_GAME_BOX_HEIGHT):
         for x in range(WIN_GAME_BOX_WIDTH):
-            win_game_box.insstr(y, x, '\u2571', Color.BACKGROUND)
+            win_game_box.insstr(y, x, '#', Color.DARKGRAY)
     win_game_box.refresh()
     win_game.clear()
     win_game.refresh()
 
-    update_status(win_status, player)
-    update_map(win_game, player, dungeon)
-
-    stdscr.getch()
+def update_screen(stdscr, player, dungeon):
+    update_status(player)
+    update_text()
+    update_map(player, dungeon)
+    stdscr.move(player.pos[1] + WIN_GAME_Y, player.pos[0] + WIN_GAME_X + WIN_GAME_BOX_X)
