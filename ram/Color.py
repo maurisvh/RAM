@@ -10,13 +10,11 @@ def initialize():
     curses.init_pair(6, curses.COLOR_YELLOW,  curses.COLOR_BLACK)
     curses.init_pair(7, curses.COLOR_WHITE,   curses.COLOR_BLACK)
     curses.init_pair(8, curses.COLOR_BLACK,   curses.COLOR_BLACK)
-    # Background color (256col)
-    curses.init_pair(9, curses.COLOR_BLACK, 234)
 
 def define_colors(stdscr):
     global BLACK, BLUE, GREEN, CYAN, RED, MAGENTA, BROWN, LIGHTGRAY
     global DARKGRAY, LIGHTBLUE, LIGHTGREEN, LIGHTCYAN, LIGHTRED
-    global LIGHTMAGENTA, YELLOW, WHITE, BACKGROUND
+    global LIGHTMAGENTA, YELLOW, WHITE
 
     BLACK        = curses.color_pair(8)
     BLUE         = curses.color_pair(1)
@@ -34,6 +32,5 @@ def define_colors(stdscr):
     LIGHTMAGENTA = curses.color_pair(5) | curses.A_BOLD
     YELLOW       = curses.color_pair(6) | curses.A_BOLD
     WHITE        = curses.color_pair(7) | curses.A_BOLD
-    BACKGROUND   = curses.color_pair(9)
 
 curses.wrapper(define_colors)
