@@ -73,7 +73,7 @@ class Item:
             (PROTECT_PILL, 6),              (COPIER, 2),
             (TORMENT_PILL, 4),
         ]
-        
+
         item = Item(0)
         w = random.randrange(sum(n for x, n in weights))
         for gen_kind, n in weights:
