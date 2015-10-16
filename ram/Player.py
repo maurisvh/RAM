@@ -139,7 +139,10 @@ class Player:
             if feat == '<':
                 d *= -1
             goal = (self.dlvl + d) & 0xFF
-            msg('There is a staircase to level {0} here.'.format(goal))
+            if feat == '<' and goal == 0xFF:
+                msg('There is a staircase to level {0} here.'.format(goal))
+            else:
+                msg('There is a staircase leading out of the dungeon here.')
 
     def step(self, level, dx, dy):
         """Return whether a turn was passed."""
