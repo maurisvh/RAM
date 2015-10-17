@@ -4,6 +4,7 @@ from string import ascii_uppercase
 
 import Color
 from Item import Item
+from Monster import Monster
 
 import curses
 import random
@@ -84,9 +85,9 @@ class Board:
 
         self.monsters = [None for n in range(MAX_MONSTERS)]
         num_mons = min(MAX_MONSTERS, random.randint(1, 2) + depth // 2)
+        mons_pos = random.sample(open_positions, num_mons)
         for i in range(num_mons):
-            # TODO make monsters
-            self.monsters[i] = None
+            self.monsters[i] = Monster.generate(self.depth, mons_pos[i])
 
         # Map from position to item.
         self.items = {}
@@ -99,6 +100,7 @@ class Board:
             self.items[p] = Item.generate(depth)
 
         # Place switches on some walls we can definitely reach.
+        # TODO scale this, too. Switches should be sort of rare.
         for i in range(3):
             [p] = random.sample(open_positions, 1)
             x, y = p
@@ -195,8 +197,8 @@ def make_dungeon():
 
     # Pick all level layouts
     layouts = []
-    while len(layouts) < 0x100:
-        needed = 0x100 - len(layouts)
+    while len(layouts) < 256:
+        needed = 256 - len(layouts)
         layouts += random.sample(descs, min(len(descs), needed))
 
     dungeon = {i: Board(i, l) for i, l in enumerate(layouts)}

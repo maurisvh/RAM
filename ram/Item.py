@@ -5,50 +5,60 @@ import curses
 import random
 import re
 
-CHAR_WEAPON     = '/'
+CHAR_WEAPON = '/'
 CHAR_BODY_ARMOR = '['
-CHAR_NECKLACE   = '"'
-CHAR_FOOD       = '*'
-CHAR_MISC       = '$'
-CHAR_ARTIFACT   = '&'
+CHAR_NECKLACE = '"'
+CHAR_FOOD = '*'
+CHAR_MISC = '$'
+CHAR_ARTIFACT = '&'
 
-weapons     = []
-body_armors = []
-necklaces   = []
-consumables = []
+fruits = list(range(0x05, 0x08))
+pills = list(range(0x08, 0x10))
 
-class Flag:
-    def __init__(self, where):
-        self.where = where
-    def __rsub__(self, num):
-        self.where.append(num); return num
-w, b, n, c = map(Flag, (weapons, body_armors, necklaces, consumables))
+NO_ITEM = 0x00
+CROWBAR = 0x01
+VOLCANIC_SHARD = 0x02
+TASER = 0x03
+JELLY_GUN = 0x04
+FULL_HP_FRUIT = fruits[0]
+FULL_TP_FRUIT = fruits[1]
+HALF_HP_FRUIT = fruits[2]
+CHARGE_PILL = pills[0]
+XP_UP_PILL = pills[1]
+HASTE_PILL = pills[2]
+IDENTIFY_PILL = pills[3]
+XP_DOWN_PILL = pills[4]
+POISON_PILL = pills[5]
+PROTECT_PILL = pills[6]
+TORMENT_PILL = pills[7]
+THICK_SWEATER = 0x10
+BALLISTIC_VEST = 0x11
+DRAGON_SCALE_MAIL = 0x12
+TITANIUM_NECKLACE = 0x13
+RUSTY_NECKLACE = 0x14
+CRIMSON_NECKLACE = 0x15
+GLOWING_NECKLACE = 0x16
+UNHOLY_NECKLACE = 0x17
+WAND_OF_DEATH = 0x18
+MANUAL = 0x19
+GUIDEBOOK = 0x1A
+CORRUPTOR = 0x1B
+OFFSETTER = 0x1C
+COPIER = 0x1D
+PALANTIR = 0x1E
+GOLDEN_CANDLE = 0x1F
 
-fruits = f = list(range(0x05, 0x08))
-random.shuffle(fruits)
-pills = p = list(range(0x08, 0x10))
-random.shuffle(pills)
-
-NO_ITEM           = 0x00;     THICK_SWEATER     = 0x10 -b
-CROWBAR           = 0x01 -w;  BALLISTIC_VEST    = 0x11 -b
-VOLCANIC_SHARD    = 0x02 -w;  DRAGON_SCALE_MAIL = 0x12 -b
-TASER             = 0x03 -w;  TITANIUM_NECKLACE = 0x13 -n
-JELLY_GUN         = 0x04 -w;  RUSTY_NECKLACE    = 0x14 -n
-FULL_HP_FRUIT     = f[0] -c;  CRIMSON_NECKLACE  = 0x15 -n
-FULL_TP_FRUIT     = f[1] -c;  GLOWING_NECKLACE  = 0x16 -n
-HALF_HP_FRUIT     = f[2] -c;  UNHOLY_NECKLACE   = 0x17 -n
-CHARGE_PILL       = p[0] -c;  WAND_OF_DEATH     = 0x18 -c
-XP_UP_PILL        = p[1] -c;  MANUAL            = 0x19 -c
-HASTE_PILL        = p[2] -c;  GUIDEBOOK         = 0x1A -c
-IDENTIFY_PILL     = p[3] -c;  CORRUPTOR         = 0x1B -c
-XP_DOWN_PILL      = p[4] -c;  OFFSETTER         = 0x1C -c
-POISON_PILL       = p[5] -c;  COPIER            = 0x1D -c
-PROTECT_PILL      = p[6] -c;  PALANTIR          = 0x1E
-TORMENT_PILL      = p[7] -c;  GOLDEN_CANDLE     = 0x1F
-del f, p, Flag, w, b, n, c
-######################################################################
+weapons = [CROWBAR, VOLCANIC_SHARD, TASER, JELLY_GUN]
+body_armors = [THICK_SWEATER, BALLISTIC_VEST, DRAGON_SCALE_MAIL]
+necklaces = [TITANIUM_NECKLACE, RUSTY_NECKLACE, CRIMSON_NECKLACE,
+             GLOWING_NECKLACE, UNHOLY_NECKLACE]
+consumables = [FULL_HP_FRUIT, FULL_TP_FRUIT, HALF_HP_FRUIT, CHARGE_PILL,
+               XP_UP_PILL, HASTE_PILL, IDENTIFY_PILL, XP_DOWN_PILL, POISON_PILL,
+               PROTECT_PILL, TORMENT_PILL, WAND_OF_DEATH, MANUAL, GUIDEBOOK,
+               CORRUPTOR, OFFSETTER, COPIER]
 
 identified = set()
+
 
 class Item:
     def __init__(self, byte):
@@ -56,25 +66,41 @@ class Item:
 
     @staticmethod
     def generate(depth):
+        depth = min(20, depth)
         weights = [
-            (CROWBAR, 10),                  (THICK_SWEATER, 8),
-            (VOLCANIC_SHARD, 7 + 1*depth),  (BALLISTIC_VEST, 6 + depth),
-            (TASER, 4 + 2*depth),           (DRAGON_SCALE_MAIL, 3*depth),
-            (JELLY_GUN, 1 + 3*depth),       (TITANIUM_NECKLACE, 3),
-            (FULL_HP_FRUIT, 10 - depth),    (RUSTY_NECKLACE, 3),
-            (FULL_TP_FRUIT, 10 - depth),    (CRIMSON_NECKLACE, 3),
-            (HALF_HP_FRUIT, 20 - depth),    (GLOWING_NECKLACE, 3),
-            (CHARGE_PILL, 6),               (UNHOLY_NECKLACE, 3),
-            (XP_UP_PILL, 4),                (WAND_OF_DEATH, 3),
-            (HASTE_PILL, 6),                (MANUAL, 3),
-            (IDENTIFY_PILL, 12),            (GUIDEBOOK, 2),
-            (XP_DOWN_PILL, 8),              (CORRUPTOR, 2),
-            (POISON_PILL, 8),               (OFFSETTER, 2),
-            (PROTECT_PILL, 6),              (COPIER, 2),
+            (CROWBAR, 10),
+            (VOLCANIC_SHARD, 7 + depth),
+            (TASER, 4 + 2 * depth),
+            (JELLY_GUN, 1 + 3 * depth),
+            (FULL_HP_FRUIT, 10 - depth // 2),
+            (FULL_TP_FRUIT, 10 - depth // 2),
+            (HALF_HP_FRUIT, 20 - depth // 2),
+            (CHARGE_PILL, 6),
+            (XP_UP_PILL, 4),
+            (HASTE_PILL, 6),
+            (IDENTIFY_PILL, 12),
+            (XP_DOWN_PILL, 8),
+            (POISON_PILL, 8),
+            (PROTECT_PILL, 6),
             (TORMENT_PILL, 4),
+            (THICK_SWEATER, 8),
+            (BALLISTIC_VEST, 6 + depth),
+            (DRAGON_SCALE_MAIL, 2 * depth),
+            (TITANIUM_NECKLACE, 3),
+            (RUSTY_NECKLACE, 3),
+            (CRIMSON_NECKLACE, 3),
+            (GLOWING_NECKLACE, 3),
+            (UNHOLY_NECKLACE, 3),
+            (WAND_OF_DEATH, 1),
+            (MANUAL, 1),
+            (GUIDEBOOK, 1 if depth > 10 else 0),
+            (CORRUPTOR, 1 if depth > 10 else 0),
+            (OFFSETTER, 1 if depth > 10 else 0),
+            (COPIER, 1 if depth > 10 else 0),
         ]
 
         item = Item(0)
+        gen_kind = None
         w = random.randrange(sum(n for x, n in weights))
         for gen_kind, n in weights:
             w -= n
@@ -83,10 +109,10 @@ class Item:
 
         item.kind = gen_kind
 
-        if gen_kind == UNHOLY_NECKLACE or item.is_equip() and \
-                random.random() < 0.1:
+        p_cursed = 1.0 if gen_kind == UNHOLY_NECKLACE else 0.1
+        if item.is_equip() and random.random() < p_cursed:
             item.cursed = True
-        if item.is_equip() and random.random() < 0.1:
+        if item.is_equip() and random.random() < 0.15:
             item.enchanted = True
 
         return item
@@ -94,43 +120,57 @@ class Item:
     @property
     def kind(self):
         return self.byte >> 3
+
     @kind.setter
     def kind(self, value):
         self.byte = (self.byte & 0b00000111) | (value << 3)
+
     @property
     def enchanted(self):
         return self.byte & 0b100
+
     @enchanted.setter
     def enchanted(self, value):
         self.byte = (self.byte & ~0b100) | (int(value) << 2)
+
     @property
     def equipped(self):
         return self.byte & 0b010
+
     @equipped.setter
     def equipped(self, value):
         self.byte = (self.byte & ~0b010) | (int(value) << 1)
+
     @property
     def cursed(self):
         return self.byte & 0b001
+
     @cursed.setter
     def cursed(self, value):
         self.byte = (self.byte & ~0b001) | (int(value) << 0)
 
     def is_weapon(self):
         return self.kind in weapons
+
     def is_body_armor(self):
         return self.kind in body_armors
+
     def is_necklace(self):
         return self.kind in necklaces
+
     def is_equip(self):
         return self.is_weapon() or self.is_body_armor() \
                or self.is_necklace()
+
     def is_consumable(self):
         return self.kind in consumables
+
     def is_pill(self):
         return self.kind in pills
+
     def is_fruit(self):
         return self.kind in fruits
+
     def known(self):
         return self.kind in identified
 
@@ -347,4 +387,3 @@ class Item:
         else:
             v = {me: 0, ac: 0, fi: 0, el: 0}
         return v[element]
-

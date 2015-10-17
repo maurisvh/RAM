@@ -3,6 +3,7 @@ ACID = 'acid'
 FIRE = 'fire'
 ELEC = 'elec'
 
+
 def name(element, verbose=False):
     if element == METAL:
         return 'metal'
