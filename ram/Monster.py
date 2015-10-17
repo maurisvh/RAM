@@ -21,6 +21,7 @@ M_TURRET = 13
 M_ELF = 14
 M_GOLDEN_DRAGON = 15
 
+
 def glitch_name(recursed=False):
     # Try to generate something believably glitchy, not just garbage.
     which = random.randint(1, 6)
@@ -42,18 +43,22 @@ def glitch_name(recursed=False):
     elif which == 5 or which == 6:
         # look like item/monster names
         name = random.choice(['strel#sk', '#tro///', 'ndroidThe',
-            'jjeellll', 'amanderYou', 'UFO\", \"', 'in((aur',
-            'itch#wi', '    /gh', ' s o\\\\\\\\', '8', 'Welcome to',
-            'You try to', 'EelfDgold', 'Suddenly,', 'The dungeon',
-            'ERROR:%d' % random.randint(-128, 127), 'anium neckla',
-            'on scale mail#ta', 'It s', '  The', '/*'])
+                              'jjeellll', 'amanderYou', 'UFO\", \"', 'in((aur',
+                              'itch#wi', '    /gh', ' s o\\\\\\\\', '8',
+                              'Welcome to',
+                              'You try to', 'EelfDgold', 'Suddenly,',
+                              'The dungeon',
+                              'ERROR:%d' % random.randint(-128, 127),
+                              'anium neckla',
+                              'on scale mail#ta', 'It s', '  The', '/*'])
         name = list(name)
         for i in range(random.randint(1, 5)):
             name.insert(random.randrange(len(name)),
-                chr(random.randint(33, 35)))
+                        chr(random.randint(33, 35)))
             if random.randrange(0, 1) == 1:
                 del name[random.randrange(len(name))]
         return ''.join(name)
+
 
 class Monster:
     appearance = {
@@ -94,14 +99,67 @@ class Monster:
         M_GOLDEN_DRAGON: 'golden dragon',
     }
 
-    def __init__(self, kind, flags, pos, hp):
+    gen_range = {
+        M_KESTREL: (1, 4),
+        M_SKELETON: (1, 5),
+        M_TROLL: (2, 6),
+        M_ANDROID: (3, 7),
+        M_JELLY: (4, 8),
+        M_SALAMANDER: (5, 9),
+        M_TINY_UFO: (6, 10),
+        M_MINOTAUR: (8, 15),
+        M_GLITCH: (0, 0),  # only in glitch world
+        M_WITCH: (11, 16),
+        M_GHOST: (13, 19),
+        M_SOLDIER: (14, 20),
+        M_ATTRACTOR: (15, 20),
+        M_TURRET: (15, 20),
+        M_ELF: (1, 0),  # don't generate
+        M_GOLDEN_DRAGON: (20, 255),
+    }
+
+    max_hp = {
+        M_KESTREL: 6,
+        M_SKELETON: 8,
+        M_TROLL: 20,
+        M_ANDROID: 15,
+        M_JELLY: 13,
+        M_SALAMANDER: 18,
+        M_TINY_UFO: 16,
+        M_MINOTAUR: 40,
+        M_GLITCH: 15,
+        M_WITCH: 24,
+        M_GHOST: 35,
+        M_SOLDIER: 45,
+        M_ATTRACTOR: 50,
+        M_TURRET: 60,
+        M_ELF: 40,
+        M_GOLDEN_DRAGON: 200,
+    }
+
+    # If not passed flags/hp, calculate a starting value.
+    def __init__(self, kind, pos, flags=None, hp=None):
+        if flags is None:
+            flags = 0x00
+        if hp is None:
+            hp = Monster.max_hp[kind]
+
         self.kind = kind
         self.flags = flags
         self.pos = pos
         self.hp = hp
 
+    @classmethod
+    def generate(cls, depth, pos):
+        opts = []
+        for kind, (lo, hi) in Monster.gen_range.items():
+            if lo <= depth <= hi:
+                opts.append(kind)
+
+        return cls(random.choice(opts), pos)
+
     def color(self):
-        col = appearance[self.kind][1]
+        col = Monster.appearance[self.kind][1]
         if isinstance(col, list):
             col = random.choice(col)
         return col
@@ -111,4 +169,3 @@ class Monster:
 
     def name(self):
         return Monster.name_table[self.kind] or glitch_name()
-

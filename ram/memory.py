@@ -24,8 +24,8 @@ addr_player_name = range(0x01, 0x10)
 # 19-1B = Monster 4 flags, pos, hp.
 # 1C-1E = Monster 5 flags, pos, hp.
 addr_mon_flags = {0x10: 0, 0x13: 1, 0x16: 2, 0x19: 3, 0x1C: 4}
-addr_mon_pos   = {0x11: 0, 0x14: 1, 0x17: 2, 0x1A: 3, 0x1D: 4}
-addr_mon_hp    = {0x12: 0, 0x15: 1, 0x18: 2, 0x1B: 3, 0x1E: 4}
+addr_mon_pos = {0x11: 0, 0x14: 1, 0x17: 2, 0x1A: 3, 0x1D: 4}
+addr_mon_hp = {0x12: 0, 0x15: 1, 0x18: 2, 0x1B: 3, 0x1E: 4}
 
 # 1F = Spell memory (8 bits)
 #
@@ -39,7 +39,7 @@ addr_timers = {0x24: Timer.POISON, 0x25: Timer.HASTE,
                0x26: Timer.CHARGE, 0x27: Timer.PROTECT}
 
 # 28-2F = inventory
-addr_inventory = {0x28+i: i for i in range(8)}
+addr_inventory = {0x28 + i: i for i in range(8)}
 
 # 30 = door appearance
 addr_door_appearance = 0x30
@@ -86,6 +86,7 @@ addr_player_metal_acid = 0x3E
 
 # 3F = fire (hi) elec (lo) res
 addr_player_fire_elec = 0x3F
+
 
 def address_name(addr):
     assert 0 <= addr < 0x40
@@ -143,6 +144,7 @@ def address_name(addr):
     else:
         return '(UNIMPLEMENTED)'
 
+
 def read_memory(player, addr):
     if addr == addr_player_appearance:
         return player.appearance_byte
@@ -195,39 +197,41 @@ def read_memory(player, addr):
         return player.dlvl
     elif addr == addr_player_metal_acid:
         return (player.aptitude[Element.METAL] << 4) \
-              | player.aptitude[Element.ACID]
+               | player.aptitude[Element.ACID]
     elif addr == addr_player_fire_elec:
         return (player.aptitude[Element.FIRE] << 4) \
-              | player.aptitude[Element.ELEC]
+               | player.aptitude[Element.ELEC]
     elif addr == 0x36 or addr == 0x37:
         raise NotImplementedError
     else:
         raise ValueError
 
+
 def describe_player(byte):
     col = [
         'white', 'yellow', 'pink', 'red',
-        'cyan',  'green',  'blue', 'gray',
+        'cyan', 'green', 'blue', 'gray',
     ][byte & 0x07]
     noun = [
-        'at sign',        'question mark',
-        'angle bracket',  'equals sign',
-        'angle bracket',  'semicolon',
-        'colon',          'nine',
-        'eight',          'seven',
-        'six',            'five',
-        'four',           'three',
-        'two',            'one',
-        'zero',           'slash',
-        'dot',            'dash',
-        'comma',          'plus',
-        'asterisk',       'parenthesis',
-        'parenthesis',    'apostrophe',
-        'ampersand',      'percent sign',
-        'dollar sign',    'pound sign',
+        'at sign', 'question mark',
+        'angle bracket', 'equals sign',
+        'angle bracket', 'semicolon',
+        'colon', 'nine',
+        'eight', 'seven',
+        'six', 'five',
+        'four', 'three',
+        'two', 'one',
+        'zero', 'slash',
+        'dot', 'dash',
+        'comma', 'plus',
+        'asterisk', 'parenthesis',
+        'parenthesis', 'apostrophe',
+        'ampersand', 'percent sign',
+        'dollar sign', 'pound sign',
         'quotation mark', 'exclamation point',
     ][byte >> 3]
-    return (col, noun)
+    return col, noun
+
 
 def bits(n):
     """Return a list of set bits in n, e.g. bits(0b11001) == [0, 3, 4]"""
@@ -239,6 +243,7 @@ def bits(n):
         n >>= 1
         i += 1
     return res
+
 
 def write_memory(player, addr, value):
     assert 0x00 <= value <= 0xFF
@@ -361,13 +366,13 @@ def write_memory(player, addr, value):
             msg('You suddenly have {0}!'.format(new.name()), Color.CYAN)
         elif new.kind == Item.NO_ITEM:
             msg('{0} suddenly disappears!'.format(old.name('Your')),
-                    Color.RED)
+                Color.RED)
         elif old.kind == new.kind and old.byte != new.byte:
             msg('{0} looks different.'.format(old.name('Your')),
-                    Color.CYAN)
+                Color.CYAN)
         else:
             msg('{0} changes into {1}!'.format(old.name('Your'),
-                new.name()), Color.CYAN)
+                                               new.name()), Color.CYAN)
     elif addr == addr_door_appearance:
         # Probably implement LOS first
         raise NotImplementedError()
@@ -397,6 +402,7 @@ def write_memory(player, addr, value):
         raise NotImplementedError()
     elif addr == addr_player_fire_elec:
         raise NotImplementedError()
+
 
 # Spells:
 # 0 zero
@@ -440,4 +446,3 @@ def cast_spell(player, spell):
         raise NotImplementedError()
     elif spell is Spell.WHN:
         raise NotImplementedError()
-

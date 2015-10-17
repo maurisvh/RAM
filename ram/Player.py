@@ -8,10 +8,11 @@ from messages import msg
 import random
 import sys
 
+
 class Player:
     def __init__(self):
         self.pos = None
-        self.dlvl = 0
+        self.dlvl = 1
 
         # Fake a zero-terminated string.
         name = 'test'
@@ -29,15 +30,14 @@ class Player:
         # Elemental aptitudes (-8 to 7)
         self.aptitude = {
             Element.METAL: 0,
-            Element.ACID:  0,
-            Element.FIRE:  0,
-            Element.ELEC:  0,
+            Element.ACID: 0,
+            Element.FIRE: 0,
+            Element.ELEC: 0,
         }
 
-        self.inventory = [Item.Item.generate(0) for i in range(8)]
-        #self.inventory[0].kind = Item.CROWBAR
-        #self.inventory[0] = Item.Item(0xFF)
-        #self.equip(0)
+        self.inventory = [Item.Item(0) for i in range(8)]
+        self.inventory[0].kind = Item.CROWBAR
+        self.equip(0)
 
         self.appearance_byte = 0
         self.display_byte = 0
@@ -45,9 +45,9 @@ class Player:
 
         # Timers (0 to 255)
         self.timers = {
-            Timer.POISON:  0,
-            Timer.HASTE:   0,
-            Timer.CHARGE:  0,
+            Timer.POISON: 0,
+            Timer.HASTE: 0,
+            Timer.CHARGE: 0,
             Timer.PROTECT: 0,
         }
 
@@ -71,7 +71,8 @@ class Player:
     @property
     def name_str(self):
         # Simulate buffer overflows.
-        s = []; p = memory.addr_player_name[0]
+        s = []
+        p = memory.addr_player_name[0]
         while True:
             c = self.read_memory(p)
             if c == 0:
@@ -104,10 +105,10 @@ class Player:
         assert item is not None
         assert not item.equipped
 
-        def remove_obj(self, obj):
+        def remove_obj(obj):
             obj.equipped = False
-            for element in self.aptitude:
-                self.aptitude[element] -= obj.element_bonus(element)
+            for elem in self.aptitude:
+                self.aptitude[elem] -= obj.element_bonus(elem)
             self.defense -= obj.defense()
 
         for j, o in enumerate(self.inventory):
@@ -115,13 +116,13 @@ class Player:
                 continue
             if item.is_weapon() and o.is_weapon() and o.equipped:
                 msg('You unwield {0}.'.format(o.name('your')))
-                remove_obj(self, o)
+                remove_obj(o)
             elif item.is_necklace() and o.is_necklace() and o.equipped:
                 msg('You remove {0}.'.format(o.name('your')))
-                remove_obj(self, o)
+                remove_obj(o)
             elif item.is_body_armor() and o.is_body_armor() and o.equipped:
                 msg('You take off {0}.'.format(o.name('your')))
-                remove_obj(self, o)
+                remove_obj(o)
 
         item.equipped = True
         for element in self.aptitude:
@@ -139,10 +140,11 @@ class Player:
             if feat == '<':
                 d *= -1
             goal = (self.dlvl + d) & 0xFF
-            if feat == '<' and goal == 0xFF:
-                msg('There is a staircase to level {0} here.'.format(goal))
-            else:
+
+            if feat == '<' and goal == 0:
                 msg('There is a staircase leading out of the dungeon here.')
+            else:
+                msg('There is a staircase to level {0} here.'.format(goal))
 
     def step(self, level, dx, dy):
         """Return whether a turn was passed."""
@@ -155,7 +157,7 @@ class Player:
             return True
         elif feat.isdigit():
             bit = 1 << int(feat)
-            new_state = 'off' if self.address & bit else 'on'
+            new_state = 'off' if self.address & bit != 0 else 'on'
             msg('You turn the BIT{0} switch {1}.'.format(feat, new_state))
             self.address ^= bit
             return True
